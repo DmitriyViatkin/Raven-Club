@@ -1,0 +1,166 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="uk" x-data="{ sidebarOpen: false, mobileMenuOpen: false }">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Воронячий Клуб{% endblock %} — Football Predictions</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold:    { DEFAULT: '#C9A84C', light: '#DFC078', dark: '#9C7A2E', faint: '#C9A84C1A' },
+            crow:    { DEFAULT: '#0D0D0F', surface: '#141416', overlay: '#1C1C1F', border: '#2A2A2E' },
+          },
+          fontFamily: {
+            display: ['"Playfair Display"', 'Georgia', 'serif'],
+            body:    ['"Crimson Pro"', 'Georgia', 'serif'],
+            mono:    ['"JetBrains Mono"', 'monospace'],
+          },
+          backgroundImage: {
+            'gold-line': 'linear-gradient(90deg, transparent, #C9A84C 40%, #C9A84C 60%, transparent)',
+          },
+        },
+      },
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="{% static 'CSS/style_css.css' %}">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+  <!-- Alpine.js -->
+  <script src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js" defer></script>
+
+
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body class="page-fade" hx-boost="true">
+
+  <!-- ════════════════════════════════════════
+       TOP NAVIGATION
+  ════════════════════════════════════════ -->
+{% include "include/header.html" %}
+
+  <!-- ════════════════════════════════════════
+       MAIN LAYOUT (sidebar + content)
+  ════════════════════════════════════════ -->
+  <div class="max-w-screen-xl mx-auto flex min-h-[calc(100vh-4rem)]">
+
+    <!-- Sidebar (only when authenticated) -->
+    {% include "include/sidebar.html" %}
+
+
+    <!-- Main content -->
+
+    <main class="flex-1 px-6 lg:px-10 py-8 relative" id="main-content">
+{% block content%}
+      <!-- Django messages -->
+      {% if messages %}
+      <div class="mb-6 flex flex-col gap-2">
+        {% for message in messages %}
+        <div class="flex items-start gap-3 px-4 py-3 rounded card"
+             style="border-left: 3px solid {% if message.tags == 'success' %}#4ade80{% elif message.tags == 'error' %}#f87171{% elif message.tags == 'warning' %}var(--gold){% else %}#60a5fa{% endif %};">
+          <span style="font-size: 0.9rem; color: var(--text-primary);">{{ message }}</span>
+          <button onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; cursor: pointer; color: var(--text-muted);">✕</button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Page header block -->
+      {% block page_header %}{% endblock %}
+
+      <!-- Main content block -->
+
+      {% endblock %}
+    </main>
+  </div>
+
+
+  <!-- ════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════ -->
+  <footer style="border-top: 1px solid var(--crow-border); margin-top: 4rem;">
+    <hr class="gold-rule" />
+    <div class="max-w-screen-xl mx-auto px-6 py-8">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><path d="M26 8c-1.5-2-4-3-7-2.5C15 6 12 8 10 11c-2 3-2.5 6.5-1 9.5 1 2.2 3 4 5.5 4.5L12 28h2l1.5-3.5c.5.1 1 .1 1.5.1 4.5 0 8.5-3.5 9-8 .3-2.8-.8-5.6-2.5-7.5L27 7l-1 1z" fill="#C9A84C" opacity=".7"/></svg>
+          <span style="font-family: 'Playfair Display', serif; color: var(--gold-dark); font-size: 0.9rem;">Воронячий Клуб</span>
+        </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">
+          Ні ковтача, ні вини. Тільки чистий розрахунок.
+        </p>
+        <div class="flex gap-6">
+          <a href="/about" class="nav-link" style="font-size: 0.8rem;">Про проект</a>
+          <a href="/rules" class="nav-link" style="font-size: 0.8rem;">Правила</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <!-- ════════════════════════════════════════
+       JAVASCRIPT UTILITIES
+  ════════════════════════════════════════ -->
+  <script>
+    // Toast utility — викликай: showToast('Прогноз збережено!', 'success')
+    function showToast(message, type = 'info') {
+      const colors = {
+        success: '#4ade80',
+        error:   '#f87171',
+        warning: '#C9A84C',
+        info:    '#60a5fa',
+      };
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.style.borderLeftColor = colors[type] || colors.info;
+      toast.innerHTML = `
+        <div style="display:flex; align-items:center; gap:.75rem;">
+          <span style="color:${colors[type]||colors.info}; font-size:1rem;">
+            ${{ success:'✓', error:'✗', warning:'⚠', info:'ℹ' }[type] || 'ℹ'}
+          </span>
+          <span>${message}</span>
+        </div>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.transition = 'opacity .3s ease, transform .3s ease';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // HTMX: show toast on success response header
+    document.body.addEventListener('htmx:afterRequest', function(evt) {
+      const header = evt.detail.xhr.getResponseHeader('X-Toast');
+      if (header) {
+        const { message, type } = JSON.parse(header);
+        showToast(message, type);
+      }
+    });
+
+    // HTMX: scroll to top on page navigation
+    document.body.addEventListener('htmx:afterSwap', function() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

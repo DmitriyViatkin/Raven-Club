@@ -1,0 +1,263 @@
+ :root {
+      --gold:         #C9A84C;
+      --gold-light:   #DFC078;
+      --gold-dark:    #9C7A2E;
+      --crow:         #0D0D0F;
+      --crow-surface: #141416;
+      --crow-overlay: #1C1C1F;
+      --crow-border:  #2A2A2E;
+      --text-primary: #F0EBE0;
+      --text-muted:   #8A8478;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--crow);
+      color: var(--text-primary);
+      font-family: 'Crimson Pro', Georgia, serif;
+      font-size: 17px;
+      line-height: 1.7;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Grain texture overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.4;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--crow-surface); }
+    ::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+    /* ── Gold horizontal rule ── */
+    .gold-rule {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+      border: none;
+      margin: 0;
+    }
+
+    /* ── Navigation ── */
+    .nav-link {
+      position: relative;
+      color: var(--text-muted);
+      font-family: 'Crimson Pro', serif;
+      font-size: 0.95rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 0.25rem 0;
+      transition: color 0.2s;
+    }
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -2px; left: 0;
+      width: 0; height: 1px;
+      background: var(--gold);
+      transition: width 0.25s ease;
+    }
+    .nav-link:hover, .nav-link.active {
+      color: var(--gold);
+    }
+    .nav-link:hover::after, .nav-link.active::after {
+      width: 100%;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      border-radius: 4px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      border-left: 2px solid transparent;
+    }
+    .sidebar-item:hover {
+      background: rgba(201, 168, 76, 0.06);
+      color: var(--gold-light);
+      border-left-color: var(--gold-dark);
+    }
+    .sidebar-item.active {
+      background: rgba(201, 168, 76, 0.10);
+      color: var(--gold);
+      border-left-color: var(--gold);
+    }
+    .sidebar-group-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      padding: 1rem 1rem 0.35rem;
+      font-family: 'Crimson Pro', serif;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--crow-surface);
+      border: 1px solid var(--crow-border);
+      border-radius: 6px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      border-color: rgba(201, 168, 76, 0.3);
+      box-shadow: 0 4px 24px rgba(201, 168, 76, 0.05);
+    }
+
+    /* ── Buttons ── */
+    .btn-gold {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--gold);
+      color: #0D0D0F;
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.6rem 1.5rem;
+      border-radius: 3px;
+      border: none; cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-gold:hover {
+      background: var(--gold-light);
+      transform: translateY(-1px);
+    }
+    .btn-outline {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: transparent;
+      color: var(--gold);
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.55rem 1.4rem;
+      border-radius: 3px;
+      border: 1px solid var(--gold-dark);
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+    .btn-outline:hover {
+      border-color: var(--gold);
+      background: rgba(201, 168, 76, 0.08);
+      color: var(--gold-light);
+    }
+
+    /* ── Status badges ── */
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-family: 'Crimson Pro', serif;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 2px;
+    }
+    .badge-active  { background: rgba(74, 222, 128, 0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
+    .badge-draft   { background: rgba(201,168,76,0.12);    color: var(--gold); border: 1px solid rgba(201,168,76,0.25); }
+    .badge-archived{ background: rgba(239,68,68,0.10);     color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+    .badge-live    { background: rgba(251,146,60,0.12);    color: #fb923c; border: 1px solid rgba(251,146,60,0.25); animation: pulse-badge 2s infinite; }
+
+    @keyframes pulse-badge {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.6; }
+    }
+
+    /* ── Form inputs ── */
+    .input-field {
+      width: 100%;
+      background: var(--crow-overlay);
+      border: 1px solid var(--crow-border);
+      color: var(--text-primary);
+      font-family: 'Crimson Pro', serif;
+      font-size: 1rem;
+      padding: 0.6rem 0.9rem;
+      border-radius: 4px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-field::placeholder { color: var(--text-muted); }
+    .input-field:focus {
+      border-color: var(--gold-dark);
+      box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.08);
+    }
+
+    /* ── Score box (predictions) ── */
+    .score-box {
+      width: 3.2rem; height: 3.2rem;
+      background: var(--crow-overlay);
+      border: 1px solid var(--crow-border);
+      border-radius: 4px;
+      color: var(--gold);
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+    }
+    .score-box::-webkit-inner-spin-button,
+    .score-box::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .score-box:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+
+    /* ── Page transition ── */
+    .page-fade { animation: fadein 0.35s ease; }
+    @keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    /* ── HTMX loading indicator ── */
+    .htmx-indicator { opacity: 0; transition: opacity 200ms ease-in; }
+    .htmx-request .htmx-indicator { opacity: 1; }
+
+    /* ── Decorative crow ── */
+    .crow-watermark {
+      position: absolute;
+      font-size: 12rem;
+      opacity: 0.03;
+      user-select: none;
+      pointer-events: none;
+      color: var(--gold);
+    }
+
+    /* ── Toast notifications ── */
+    #toast-container {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      z-index: 9999;
+      display: flex; flex-direction: column; gap: 0.75rem;
+    }
+    .toast {
+      background: var(--crow-overlay);
+      border: 1px solid var(--crow-border);
+      border-left: 3px solid var(--gold);
+      padding: 0.75rem 1.25rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      animation: slide-in 0.3s ease;
+      max-width: 320px;
+    }
+    @keyframes slide-in {
+      from { transform: translateX(100%); opacity: 0; }
+      to   { transform: none; opacity: 1; }
+    }
