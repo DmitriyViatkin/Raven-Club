@@ -1,28 +1,24 @@
 from django.db import models
-from src.tournaments.models import Match
+from src.tournaments.models import Match, Tournament
 from src.users.models import Player
 
 
 class MatchResult(models.Model):
     """Еталонні результати матчів, які вносяться адміністратором."""
 
-    # Змінено на OneToOneField (у матчу може бути лише один результат)
     match = models.OneToOneField(
         Match,
         on_delete=models.CASCADE,
-        related_name="match_result"  # в однині, бо зв'язок 1:1
+        related_name="match_result"
     )
-
     home_ft = models.IntegerField()
     away_ft = models.IntegerField()
 
-    # Денормалізовані поля (якщо ви вирішили їх залишити)
     home_scored = models.BooleanField(default=False)
     away_scored = models.BooleanField(default=False)
     home_clean_sheet = models.BooleanField(default=False)
     away_clean_sheet = models.BooleanField(default=False)
 
-    # Змінено on_delete на SET_NULL, щоб не втратити результати матчу, якщо видалять адміна
     entered_by = models.ForeignKey(
         Player,
         on_delete=models.SET_NULL,
@@ -30,10 +26,8 @@ class MatchResult(models.Model):
         blank=True,
         related_name="entered_results"
     )
-
     entered_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(
-        auto_now=True)  # Виправлено на auto_now для автоматичного оновлення
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Match Result"
@@ -41,3 +35,41 @@ class MatchResult(models.Model):
 
     def __str__(self):
         return f"Result for match {self.match_id}: {self.home_ft}-{self.away_ft}"
+
+
+class Prediction(models.Model):
+    """Прогнози користувачів на конкретні матчі."""
+
+    user = models.ForeignKey(Player, on_delete=models.CASCADE,
+                             related_name="predictions")
+    match = models.ForeignKey(Match, on_delete=models.CASCADE,
+                              related_name="predictions")
+
+    # Денормалізоване поле за ТЗ для швидкої фільтрації прогнозів по всьому турніру
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE,
+                                   related_name="predictions")
+
+    home_ft = models.IntegerField()
+    away_ft = models.IntegerField()
+
+    home_scored = models.BooleanField(default=False)
+    away_scored = models.BooleanField(default=False)
+    home_clean_sheet = models.BooleanField(default=False)
+    away_clean_sheet = models.BooleanField(default=False)
+
+    # Виправлено: додано default=0, оскільки на старті балів ще немає
+    points_earned = models.IntegerField(default=0)
+
+    is_calculated = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        # Гравець може зробити лише один прогноз на один конкретний матч
+        unique_together = ('user', 'match')
+        verbose_name = "Prediction"
+        verbose_name_plural = "Predictions"
+
+    def __str__(self):
+        # Виправлено синтаксичну помилку розриву рядка
+        return f"Prediction by {self.user.username} for match {self.match_id} ({self.home_ft}:{self.away_ft})"
