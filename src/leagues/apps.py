@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class LeaguesConfig(AppConfig):
-    name = 'leagues'
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'src.leagues'  # Тут теж додаємо 'src.'

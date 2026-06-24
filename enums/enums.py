@@ -2,6 +2,19 @@
 from enum import Enum
 
 
+class Status(Enum):
+    draft = "Чернетка"
+    active ="Діюча"
+    archived="Закінчено"
+
+    @classmethod
+    def choices(cls):
+        title = {
+            cls.draft: "Чернетка",
+            cls.active: "Діюча",
+            cls.archived: "Закінчено"
+        }
+
 
 class  Language(Enum):
     """ Language enum """
