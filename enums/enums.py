@@ -3,6 +3,8 @@ from enum import Enum
 
 
 class Status(Enum):
+    """ Status enum  Leagues"""
+
     draft = "Чернетка"
     active ="Діюча"
     archived="Закінчено"
@@ -14,6 +16,22 @@ class Status(Enum):
             cls.active: "Діюча",
             cls.archived: "Закінчено"
         }
+
+class StatusTournament(Enum):
+    """ Status enum  Tournament"""
+
+    upcoming = "майбутні"
+    active = "активні "
+    finished =  "завершені"
+
+    @classmethod
+    def choices(cls):
+        title = {
+            cls.upcoming: "Майбутні",
+            cls.active: "Активні",
+            cls.finished: "Закінчені"
+        }
+
 
 
 class  Language(Enum):

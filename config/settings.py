@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'leaderboard',
     'src.leagues',
     'notifications',
-    'tournaments',
+    'src.tournaments',
     'results',
 
 ]

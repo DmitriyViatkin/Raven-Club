@@ -23,9 +23,9 @@ class League (models.Model):
 
 class LeagueMember (models.Model):
 
-    league_id = models.ForeignKey(League, on_delete= models.CASCADE,
+    league = models.ForeignKey(League, on_delete= models.CASCADE,
                                   related_name='members')
-    user_id = models.ForeignKey(Player, on_delete= models.CASCADE,
+    user = models.ForeignKey(Player, on_delete= models.CASCADE,
                                 related_name='league_memberships')
     role = models.CharField(max_length= 20 , choices=Role.choices(),
                             default=Role.USER.value)
@@ -42,7 +42,7 @@ class LeagueMember (models.Model):
 
 class ScoringRules(models.Model):
 
-    league_id= models.ForeignKey(League, on_delete= models.CASCADE)
+    league= models.ForeignKey(League, on_delete= models.CASCADE)
     point_exact_score = models.IntegerField()
     point_correct_winner= models.IntegerField()
     point_correct_diff= models.IntegerField()
