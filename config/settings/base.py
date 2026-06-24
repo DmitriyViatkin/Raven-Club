@@ -20,10 +20,11 @@ from dotenv import load_dotenv
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, os.path.join(BASE_DIR, 'src'))
 load_dotenv(BASE_DIR/'.env')
-
+print("DEBUG =", os.getenv("DEBUG"))
+print("ALLOWED_HOSTS =", os.getenv("ALLOWED_HOSTS"))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -31,9 +32,15 @@ load_dotenv(BASE_DIR/'.env')
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
-ALLOWED_HOSTS = []
+if DEBUG:
+    ALLOWED_HOSTS = []
+else:
+    # Здесь укажи домены своего продакшена, когда они появятся
+    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS','127.0.0.1,localhost').split(',')
+
+from .unfold import *
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL= ' /login'
@@ -42,6 +49,10 @@ LOGOUT_REDIRECT_URL= ' /login'
 # Application definition
 
 INSTALLED_APPS = [
+    #Unfold
+    'unfold',
+    'unfold.contrib.filters',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
