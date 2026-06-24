@@ -34,7 +34,7 @@ class LeagueMember (models.Model):
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('league_id', 'user_id')
+        unique_together = ('league', 'user')
         verbose_name = "League Member"
         verbose_name_plural = "League Members"
 

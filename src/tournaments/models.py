@@ -36,7 +36,7 @@ class Round(models.Model):
     is_locked= models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('tournament_id', 'round_number')
+        unique_together = ('tournament', 'round_number')
         verbose_name = "Round"
         verbose_name_plural = "Rounds"
 

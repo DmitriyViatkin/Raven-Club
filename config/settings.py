@@ -55,7 +55,7 @@ INSTALLED_APPS = [
     'src.leagues',
     'notifications',
     'src.tournaments',
-    'results',
+    'src.results',
 
 ]
 AUTH_USER_MODEL = 'users.Player'
