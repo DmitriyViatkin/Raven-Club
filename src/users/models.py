@@ -18,4 +18,4 @@ class Player(AbstractUser):
     REQUIRED_FIELDS = ['username']
 
     def __str__(self):
-        return self.name
+        return self.username
