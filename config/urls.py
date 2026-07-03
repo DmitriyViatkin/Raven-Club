@@ -24,5 +24,8 @@ urlpatterns = [
     path ('', include('django.contrib.auth.urls')),
     path ('', include('authentication.urls')),
     path ('', include('core.urls')),
-    path('admin/', admin.site.urls),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    path ('users/', include('src.users.urls')),
+    path ('admin/', admin.site.urls),
+]
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
