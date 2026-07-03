@@ -21,7 +21,7 @@ class StatusTournament(Enum):
     """ Status enum  Tournament"""
 
     upcoming = "майбутні"
-    active = "активні "
+    active = "активні"
     finished =  "завершені"
 
     @classmethod

@@ -48,7 +48,7 @@ UNFOLD = {
                 "collapsible": True,
                 "items": [
                     {
-                        "title": "Все лиги",
+                        "title": "All Leagues (Все лиги)",
                         "icon": "emoji_events",
                         "link": reverse_lazy("admin:leagues_league_changelist"),
                     },
@@ -56,6 +56,16 @@ UNFOLD = {
                         "title": "Участники лиг",
                         "icon": "groups",
                         "link": reverse_lazy("admin:leagues_leaguemember_changelist"),
+                    },
+                    {
+                        "title": "Турниры",
+                        "icon": "military_tech",
+                        "link": reverse_lazy("admin:tournaments_tournament_changelist"),
+                    },
+                    {
+                        "title": "Раунды / Туры",
+                        "icon": "calendar_view_day",
+                        "link": reverse_lazy("admin:tournaments_round_changelist"),
                     },
                     {
                         "title": "Правила начисления",
@@ -70,10 +80,9 @@ UNFOLD = {
                 "collapsible": True,
                 "items": [
                     {
-                        "title": "Результаты матчей",
+                        "title": "Управление матчами",
                         "icon": "scoreboard",
-                        # Исправлено: заменили leagues на results
-                        "link": reverse_lazy("admin:results_matchresult_changelist"),
+                        "link": reverse_lazy("admin:tournaments_match_changelist"),
                     },
                 ],
             },

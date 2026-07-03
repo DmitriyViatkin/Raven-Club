@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+{% load unfold %}
+
+{% block content %}
+
+<h2>{{ round.name }}</h2>
+
+<table>
+    <tr>
+        <th>Матч</th>
+        <th>Счет</th>
+    </tr>
+
+    {% for match in matches %}
+    <tr>
+        <td>{{ match.home_team }} - {{ match.away_team }}</td>
+
+        <td>
+            <input>
+            :
+            <input>
+        </td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+{% endblock %}
