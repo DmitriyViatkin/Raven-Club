@@ -2,10 +2,16 @@ from django.db import models
 from enums.enums import Status, Role
 from src.users.models import Player
 
-
 class League (models.Model):
 
     name=models.CharField(max_length=100)
+    teams = models.ManyToManyField(
+        "tournaments.Team",
+
+        blank=True,
+        related_name="leagues",
+        verbose_name="Команди ліги"
+    )
     slug=models.CharField(max_length=100, unique=True)
     short_description=models.CharField(max_length=300)
     full_description=models.TextField()
