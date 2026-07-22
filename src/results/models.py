@@ -1,6 +1,3 @@
-from django.db import models
-from src.tournaments.models import Match, Tournament
-from src.users.models import Player
 
 
 from django.db import models

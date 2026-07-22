@@ -44,8 +44,6 @@ class LeagueMember (models.Model):
         verbose_name = "League Member"
         verbose_name_plural = "League Members"
 
-
-
 class ScoringRules(models.Model):
 
     league= models.ForeignKey(League, on_delete= models.CASCADE)
