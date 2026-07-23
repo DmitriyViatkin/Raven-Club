@@ -1,0 +1,88 @@
+ {% extends "base/index.html" %}
+{% load static %}
+
+{% block title %}Мої ліги{% endblock %}
+
+{% block page_header %}
+<div class="flex items-center justify-between mb-8">
+  <div>
+    <h1 style="font-family: 'Playfair Display', serif; font-size: 1.75rem; color: var(--text-primary); font-weight: 600;">
+      Мої ліги
+    </h1>
+    <p style="font-size: 0.9rem; color: var(--text-muted); font-style: italic; margin-top: 0.25rem;">
+      Турніри, у яких ти береш участь
+    </p>
+  </div>
+  <a href="{% url 'index' %}" class="nav-link" style="border: 1px solid var(--gold-dark); padding: 0.4rem 1rem; border-radius: 4px; font-size: 0.85rem;">
+    + Приєднатись до ліги
+  </a>
+</div>
+<hr class="gold-rule mb-8" />
+{% endblock %}
+
+{% block content %}
+{{ block.super }}
+
+{% if leagues %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+  {% for league in leagues %}
+  <a href="{% url 'predictions:league_detail' league.pk %}" class="card no-underline" style="display: block; padding: 1.5rem; transition: border-color .2s ease;">
+    <div class="flex items-start justify-between mb-3">
+      <h2 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--gold); font-weight: 600;">
+        {{ league.name }}
+      </h2>
+      {% if league.is_private %}
+      <span style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold-dark); border: 1px solid var(--gold-dark); padding: 0.1rem 0.5rem; border-radius: 3px;">
+        Приватна
+      </span>
+      {% endif %}
+    </div>
+
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; min-height: 2.2em;">
+      {{ league.description|default:"Без опису"|truncatechars:80 }}
+    </p>
+
+    <div class="flex items-center justify-between" style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--crow-border); padding-top: 0.75rem;">
+      <span class="flex items-center gap-1">
+        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+        {{ league.members.count }} учасників
+      </span>
+      <span style="font-family: 'JetBrains Mono', monospace; color: var(--gold-dark);">
+        #{{ league.pk }}
+      </span>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+
+<!-- Пагінація -->
+{% if is_paginated %}
+<div class="flex items-center justify-center gap-4 mt-10">
+  {% if page_obj.has_previous %}
+  <a href="?page={{ page_obj.previous_page_number }}" class="nav-link" style="font-size: 0.85rem;">← Назад</a>
+  {% endif %}
+
+  <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted);">
+    {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+  </span>
+
+  {% if page_obj.has_next %}
+  <a href="?page={{ page_obj.next_page_number }}" class="nav-link" style="font-size: 0.85rem;">Далі →</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<!-- Порожній стан -->
+<div class="flex flex-col items-center justify-center text-center py-20 card">
+  <svg width="40" height="40" viewBox="0 0 32 32" fill="none" style="margin-bottom: 1rem; opacity: 0.5;"><path d="M26 8c-1.5-2-4-3-7-2.5C15 6 12 8 10 11c-2 3-2.5 6.5-1 9.5 1 2.2 3 4 5.5 4.5L12 28h2l1.5-3.5c.5.1 1 .1 1.5.1 4.5 0 8.5-3.5 9-8 .3-2.8-.8-5.6-2.5-7.5L27 7l-1 1z" fill="#C9A84C" opacity=".7"/></svg>
+  <p style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--text-primary); margin-bottom: 0.5rem;">
+    Ти ще не в жодній лізі
+  </p>
+  <p style="font-size: 0.85rem; color: var(--text-muted);">
+    Приєднайся до існуючої ліги або створи свою
+  </p>
+</div>
+{% endif %}
+
+{% endblock %}

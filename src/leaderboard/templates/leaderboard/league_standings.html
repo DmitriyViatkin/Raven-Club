@@ -1,0 +1,27 @@
+{% extends "base/index.html" %}
+{% block content %}
+<div class="max-w-3xl mx-auto mt-8">
+    <h1 class="text-2xl font-bold text-white mb-4">{{ league.name }} — Турнирная таблица</h1>
+
+    <table class="w-full text-white border border-gray-600 rounded-lg overflow-hidden">
+        <thead class="bg-gray-800">
+            <tr>
+                <th class="px-4 py-2 text-left">#</th>
+                <th class="px-4 py-2 text-left">Игрок</th>
+                <th class="px-4 py-2 text-right">Очки</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for member in standings %}
+            <tr class="border-t border-gray-600 {% if member.user == request.user %}bg-primary-600/20{% endif %}">
+                <td class="px-4 py-2">{{ member.computed_rank }}</td>
+                <td class="px-4 py-2">{{ member.user.username }}</td>
+                <td class="px-4 py-2 text-right font-semibold">{{ member.total_points }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3" class="px-4 py-4 text-center text-gray-400">Пока нет участников</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

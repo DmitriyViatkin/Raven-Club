@@ -1,0 +1,97 @@
+{% extends "base/index.html" %}
+{% load static %}
+
+{% block title %}{{ tournament.name }}{% endblock %}
+
+{% block page_header %}
+<div class="flex items-start justify-between mb-6">
+  <div>
+    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.35rem;">
+      <a href="{% url 'predictions:league_detail' tournament.league.pk %}" class="nav-link">
+        {{ tournament.league.name }}
+      </a>
+      <span style="opacity: 0.5;"> / </span> Турнір
+    </p>
+
+    <div class="flex items-center gap-3 mb-1">
+      <h1 style="font-family: 'Playfair Display', serif; font-size: 1.75rem; color: var(--text-primary); font-weight: 600;">
+        {{ tournament.name }}
+      </h1>
+      <span style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.15rem 0.5rem; border-radius: 3px;
+        {% if tournament.status == 'ongoing' %}color: #4ade80; border: 1px solid #4ade80;
+        {% elif tournament.status == 'finished' %}color: var(--text-muted); border: 1px solid var(--crow-border);
+        {% else %}color: var(--gold-dark); border: 1px solid var(--gold-dark);{% endif %}">
+        {{ tournament.get_status_display }}
+      </span>
+    </div>
+
+    <p style="font-size: 0.85rem; color: var(--gold-dark); font-family: 'JetBrains Mono', monospace;">
+      Сезон {{ tournament.season }}
+    </p>
+  </div>
+</div>
+
+<div class="flex items-center gap-6 mb-6" style="font-size: 0.85rem; color: var(--text-muted);">
+  <span class="flex items-center gap-1">
+    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+    {{ tournament.starts_at|date:"d.m.Y" }} — {{ tournament.ends_at|date:"d.m.Y" }}
+  </span>
+  <span class="flex items-center gap-1">
+    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>
+    {{ tournament.round.count }} турів
+  </span>
+</div>
+<hr class="gold-rule mb-8" />
+{% endblock %}
+
+{% block content %}
+{{ block.super }}
+
+{% with rounds=tournament.round.all %}
+{% if rounds %}
+<div class="flex flex-col gap-3">
+  {% for round in rounds %}
+  <a href="{% url 'predictions:round_matches' round.pk %}" class="card no-underline flex items-center justify-between" style="padding: 1.1rem 1.5rem;">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center justify-center w-9 h-9 rounded-full shrink-0" style="background: var(--crow-overlay); border: 1px solid var(--gold-dark); font-family: 'JetBrains Mono', monospace; color: var(--gold); font-size: 0.85rem;">
+        {{ round.round_number }}
+      </div>
+      <div>
+        <div style="font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--text-primary);">
+          {{ round.name }}
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">
+          {{ round.matches.count }} матчів · дедлайн {{ round.deadline|date:"d.m.Y H:i" }}
+        </div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      {% if round.is_locked %}
+      <span style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); border: 1px solid var(--crow-border); padding: 0.15rem 0.5rem; border-radius: 3px;">
+        Закрито
+      </span>
+      {% else %}
+      <span style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: #4ade80; border: 1px solid #4ade80; padding: 0.15rem 0.5rem; border-radius: 3px;">
+        Відкрито
+      </span>
+      {% endif %}
+      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5" style="color: var(--gold-dark);"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="flex flex-col items-center justify-center text-center py-20 card">
+  <p style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--text-primary); margin-bottom: 0.5rem;">
+    У цьому турнірі ще немає турів
+  </p>
+  <p style="font-size: 0.85rem; color: var(--text-muted);">
+    Тури з'являться, коли буде складений календар матчів
+  </p>
+</div>
+{% endif %}
+{% endwith %}
+
+{% endblock %}

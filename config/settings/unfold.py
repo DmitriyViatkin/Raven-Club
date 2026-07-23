@@ -80,6 +80,13 @@ UNFOLD = {
                 "collapsible": True,
                 "items": [
                     {
+                        "title": "Команды (Клубы)",
+                        "icon": "sports_soccer",
+                        # Ссылка формируется автоматически: приложение_модель_changelist
+                        # Так как Team находится в приложении src.tournaments, то имя турниров:
+                        "link": reverse_lazy("admin:tournaments_team_changelist"),
+                    },
+                    {
                         "title": "Управление матчами",
                         "icon": "scoreboard",
                         "link": reverse_lazy("admin:tournaments_match_changelist"),

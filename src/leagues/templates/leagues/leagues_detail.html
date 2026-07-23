@@ -1,0 +1,135 @@
+{% extends "base/index.html" %}
+{% load static %}
+
+{% block title %}{{ league.name }}{% endblock %}
+
+{% block page_header %}
+<div class="flex items-start justify-between mb-6">
+  <div class="flex items-start gap-4">
+    {% if league.logo %}
+    <img src="{{ league.logo.url }}" class="w-16 h-16 rounded-full object-cover" style="border: 1px solid var(--gold-dark);" />
+    {% else %}
+    <div class="w-16 h-16 rounded-full flex items-center justify-center shrink-0" style="background: var(--crow-overlay); border: 1px solid var(--gold-dark); font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1.5rem; font-weight: 700;">
+      {{ league.name|slice:":1"|upper }}
+    </div>
+    {% endif %}
+
+    <div>
+      <div class="flex items-center gap-3 mb-1">
+        <h1 style="font-family: 'Playfair Display', serif; font-size: 1.75rem; color: var(--text-primary); font-weight: 600;">
+          {{ league.name }}
+        </h1>
+        {% if league.is_private %}
+        <span style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--gold-dark); border: 1px solid var(--gold-dark); padding: 0.15rem 0.5rem; border-radius: 3px;">
+          Приватна
+        </span>
+        {% endif %}
+        <span style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); border: 1px solid var(--crow-border); padding: 0.15rem 0.5rem; border-radius: 3px;">
+          {{ league.get_status_display }}
+        </span>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--text-muted); font-style: italic;">
+        {{ league.short_description }}
+      </p>
+    </div>
+  </div>
+
+{% if is_member %}
+<form method="post" action="{% url 'predictions:league_leave' pk=league.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded">
+        Вийти з ліги
+    </button>
+</form>
+{% else %}
+<form method="post" action="{% url 'predictions:league_join' pk=league.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded">
+        Вступити до ліги
+    </button>
+</form>
+{% endif %}
+</div>
+
+{% if league.full_description %}
+<p style="font-size: 0.9rem; color: var(--text-primary); line-height: 1.6; margin-bottom: 1.5rem; max-width: 60ch;">
+  {{ league.full_description }}
+</p>
+{% endif %}
+
+<div class="flex items-center gap-6 mb-6" style="font-size: 0.85rem; color: var(--text-muted);">
+  <span class="flex items-center gap-1">
+    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+    {{ league.members.count }} учасників
+  </span>
+  <span>{{ teams_count }} команд</span>
+  <span style="font-family: 'JetBrains Mono', monospace; color: var(--gold-dark);">
+    #{{ league.slug }}
+  </span>
+</div>
+<hr class="gold-rule mb-8" />
+{% endblock %}
+
+{% block content %}
+{{ block.super }}
+
+{% if tournaments %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+  {% for tournament in tournaments %}
+  <a href="{% url 'tournaments:detail' tournament.pk %}" class="card no-underline" style="display: block; padding: 1.5rem;">
+    <div class="flex items-start justify-between mb-2">
+      <h2 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--gold); font-weight: 600;">
+        {{ tournament.name }}
+      </h2>
+      <span style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.1rem 0.5rem; border-radius: 3px;
+        {% if tournament.status == 'ongoing' %}color: #4ade80; border: 1px solid #4ade80;
+        {% elif tournament.status == 'finished' %}color: var(--text-muted); border: 1px solid var(--crow-border);
+        {% else %}color: var(--gold-dark); border: 1px solid var(--gold-dark);{% endif %}">
+        {{ tournament.get_status_display }}
+      </span>
+    </div>
+
+    <p style="font-size: 0.8rem; color: var(--gold-dark); font-family: 'JetBrains Mono', monospace; margin-bottom: 0.75rem;">
+      Сезон {{ tournament.season }}
+    </p>
+
+    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1rem;">
+      {{ tournament.starts_at|date:"d.m.Y" }} — {{ tournament.ends_at|date:"d.m.Y" }}
+    </div>
+
+    <div class="flex items-center justify-between" style="font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--crow-border); padding-top: 0.75rem;">
+      <span>{{ tournament.round.count }} турів</span>
+      <span style="font-family: 'JetBrains Mono', monospace; color: var(--gold-dark);">
+        #{{ tournament.pk }}
+      </span>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+
+{% if is_paginated %}
+<div class="flex items-center justify-center gap-4 mt-10">
+  {% if page_obj.has_previous %}
+  <a href="?page={{ page_obj.previous_page_number }}" class="nav-link" style="font-size: 0.85rem;">← Назад</a>
+  {% endif %}
+  <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text-muted);">
+    {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+  </span>
+  {% if page_obj.has_next %}
+  <a href="?page={{ page_obj.next_page_number }}" class="nav-link" style="font-size: 0.85rem;">Далі →</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="flex flex-col items-center justify-center text-center py-20 card">
+  <p style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--text-primary); margin-bottom: 0.5rem;">
+    У цій лізі ще немає турнірів
+  </p>
+  <p style="font-size: 0.85rem; color: var(--text-muted);">
+    Слідкуй за оновленнями — турніри з'являться найближчим часом
+  </p>
+</div>
+{% endif %}
+
+{% endblock %}

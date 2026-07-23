@@ -34,6 +34,7 @@ class LeagueAdmin(ModelAdmin):
     list_display_links = ("name",)
     list_filter = ("status", "is_private", "create_at")
     search_fields = ("name", "slug", "create_by__email", "create_by__username")
+    filter_horizontal = ("teams",)
     autocomplete_fields = (
         "create_by",)  # Делает выпадающий список создателя удобным поисковым инпутом
 
@@ -43,6 +44,8 @@ class LeagueAdmin(ModelAdmin):
     # Красиво группируем поля лиги в интерфейсе Unfold
     fieldsets = (
         (None, {"fields": ("name", "slug", "logo")}),
+        (_("Команди"), {"fields": ("teams",)}),
+        # <-- ВОТ ЭТА СТРОКА ОЖИВИТ ВЫБОР КОМАНД
         (_("Descriptions"), {"fields": ("short_description", "full_description")}),
         (_("Settings"), {"fields": ("is_private", "status")}),
         (_("Meta"), {"fields": ("create_by", "create_at")}),

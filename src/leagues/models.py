@@ -1,11 +1,19 @@
 from django.db import models
 from enums.enums import Status, Role
 from src.users.models import Player
+from typing import TYPE_CHECKING, List
 
 
 class League (models.Model):
 
     name=models.CharField(max_length=100)
+    teams = models.ManyToManyField(
+        "tournaments.Team",
+
+        blank=True,
+        related_name="leagues",
+        verbose_name="Команди ліги"
+    )
     slug=models.CharField(max_length=100, unique=True)
     short_description=models.CharField(max_length=300)
     full_description=models.TextField()
@@ -16,7 +24,8 @@ class League (models.Model):
     create_by= models.ForeignKey(Player, on_delete= models.PROTECT,
                                  related_name='created_leagues' )
     create_at= models.DateField()
-
+    if TYPE_CHECKING:
+        ranked_members: List["LeagueMember"]
     class Meta:
         verbose_name = "League"
         verbose_name_plural = "Leagues"
@@ -37,8 +46,6 @@ class LeagueMember (models.Model):
         unique_together = ('league', 'user')
         verbose_name = "League Member"
         verbose_name_plural = "League Members"
-
-
 
 class ScoringRules(models.Model):
 

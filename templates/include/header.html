@@ -69,7 +69,7 @@
           <div x-show="open" @click.outside="open = false" x-transition
                class="absolute right-0 mt-2 w-48 rounded-md card py-1"
                style="border: 1px solid var(--crow-border); min-width: 180px;">
-            <a href="{% url 'index' %}" class="block px-4 py-2 text-sm" style="color: var(--text-muted); transition: color .15s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-muted)'">Мій профіль</a>
+            <a href="{% url 'user-profile' %}" class="block px-4 py-2 text-sm" style="color: var(--text-muted); transition: color .15s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-muted)'">Мій профіль</a>
             {% if user.role == 'admin' or user.role == 'moderator' %}
             <a href="/admin/" class="block px-4 py-2 text-sm" style="color: var(--text-muted); transition: color .15s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-muted)'">Адмін-панель</a>
             {% endif %}
