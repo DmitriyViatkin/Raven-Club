@@ -20,6 +20,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+import leaderboard
+
 urlpatterns = [
     path ('', include('django.contrib.auth.urls')),
     path ('', include('authentication.urls')),
@@ -27,6 +29,7 @@ urlpatterns = [
     path ('predictions/', include('src.leagues.urls')),
     path ('users/', include('src.users.urls')),
     path ('tournaments/', include('src.tournaments.urls')),
+    path('leaderboard/', include('src.leaderboard.urls')),
     path ('admin/', admin.site.urls),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -1,66 +1,81 @@
-from django.db import transaction
-from src.results.models import MatchResult , Prediction
-from src.tournaments.models import Match, Round,  Tournament
-from src.leagues.models import ScoringRules
-from django.utils import timezone
+# predictions/services.py
+from django.db.models import Sum
+
+from src.results.models import  Prediction
+from src.leagues.models import LeagueMember
 
 
+def calculate_points(prediction, result):
+    """Ваша логика начисления баллов по ScoringRules."""
+    league = prediction.tournament.league
+    rules = league.scoringrules_set.first()  # или как у вас связано
 
-def calculate_points_for_match(match_id: int) -> dict:
-    try:
-        match = Match.objects.select_related(
-            'round__tournament__league'
-        ).get(id=match_id)
-    except Match.DoesNotExist:
-        raise ValueError(f"Match with id {match_id} does not exist.")
+    points = 0
 
-    result = getattr(match, "match_result", None)
-    if result is None:
-        return {"status": "error", "message": "У матча не указан финальный счет."}
-
-    league = match.round.tournament.league
-    try:
-        rules = ScoringRules.objects.get(league=league)
-    except ScoringRules.DoesNotExist:
-        return {"status": "error",
-                "message": f"Не найдены ScoringRules для лиги '{league.name}'."}
-
-    predictions = Prediction.objects.filter(match=match, is_calculated=False)
-    if not predictions.exists():
-        return {"status": "info", "message": "Нет новых прогнозов для расчета."}
-
-    now = timezone.now()
-    predictions_to_update = []
-    for pred in predictions:
-        points = 0
-        if pred.home_ft == result.home_ft and pred.away_ft == result.away_ft:
-            points += rules.point_exact_score
-        if (pred.home_ft - pred.away_ft) == (result.home_ft - result.away_ft):
-            points += rules.point_correct_diff
-        if (pred.home_ft > pred.away_ft and result.home_ft > result.away_ft) or \
-           (pred.home_ft < pred.away_ft and result.home_ft < result.away_ft):
+    # точный счёт
+    if prediction.home_ft == result.home_ft and prediction.away_ft == result.away_ft:
+        points += rules.point_exact_score
+    else:
+        # правильный победитель
+        pred_winner = _winner(prediction.home_ft, prediction.away_ft)
+        if pred_winner == result.winner:
             points += rules.point_correct_winner
-        if pred.home_ft > 0 and result.home_ft > 0:
-            points += rules.points_home_scored
-        if pred.away_ft > 0 and result.away_ft > 0:
-            points += rules.points_away_scored
-        if result.away_ft == 0 and pred.home_clean_sheet:
-            points += rules.points_home_clean_sheet
-        if result.home_ft == 0 and pred.away_clean_sheet:
-            points += rules.points_away_clean_sheet
+        # правильная разница
+        if (prediction.home_ft - prediction.away_ft) == (result.home_ft - result.away_ft):
+            points += rules.point_correct_diff
 
-        pred.points_earned = points
-        pred.is_calculated = True
-        pred.updated_at = now
-        predictions_to_update.append(pred)
+    if prediction.home_scored and result.home_scored:
+        points += rules.points_home_scored
+    if prediction.away_scored and result.away_scored:
+        points += rules.points_away_scored
+    if prediction.home_clean_sheet and result.home_clean_sheet:
+        points += rules.points_home_clean_sheet
+    if prediction.away_clean_sheet and result.away_clean_sheet:
+        points += rules.points_away_clean_sheet
 
-    with transaction.atomic():
-        Prediction.objects.bulk_update(
-            predictions_to_update,
-            fields=['points_earned', 'is_calculated', 'updated_at']
-        )
+    return points
 
-    return {
-        "status": "success",
-        "message": f"Успешно рассчитано прогнозов: {len(predictions_to_update)}"
-    }
+
+def _winner(home, away):
+    if home > away:
+        return "home"
+    if away > home:
+        return "away"
+    return None
+
+
+def calculate_round_results(round_obj):
+    """Считает очки для всех прогнозов тура и обновляет таблицы затронутых лиг."""
+    touched_leagues = set()
+
+    matches = round_obj.matches.select_related("match_result")
+
+    for match in matches:
+        result = getattr(match, "match_result", None)
+        if not result:
+            continue
+
+        predictions = match.predictions.select_related("tournament__league")
+
+        for prediction in predictions:
+            prediction.points_earned = calculate_points(prediction, result)
+            prediction.is_calculated = True
+            prediction.save(update_fields=["points_earned", "is_calculated"])
+            touched_leagues.add(prediction.tournament.league_id)
+
+    from src.leagues.models import League
+    for league in League.objects.filter(id__in=touched_leagues):
+        recalc_league_points(league)
+
+
+def recalc_league_points(league):
+    members = list(league.members.all())
+    for member in members:
+        total = Prediction.objects.filter(
+            user=member.user,
+            tournament__league=league,
+            is_calculated=True,
+        ).aggregate(s=Sum("points_earned"))["s"] or 0
+        member.total_points = total
+
+    LeagueMember.objects.bulk_update(members, ["total_points"])

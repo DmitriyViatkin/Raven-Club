@@ -34,14 +34,21 @@
     </div>
   </div>
 
-  {% if not is_member %}
-  <form method="post" action="{% url 'leagues:join' league.pk %}">
+{% if is_member %}
+<form method="post" action="{% url 'predictions:league_leave' pk=league.pk %}">
     {% csrf_token %}
-    <button type="submit" class="nav-link" style="border: 1px solid var(--gold-dark); padding: 0.5rem 1.25rem; border-radius: 4px; font-size: 0.85rem;">
-      Приєднатись
+    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded">
+        Вийти з ліги
     </button>
-  </form>
-  {% endif %}
+</form>
+{% else %}
+<form method="post" action="{% url 'predictions:league_join' pk=league.pk %}">
+    {% csrf_token %}
+    <button type="submit" class="bg-primary-600 text-white px-4 py-2 rounded">
+        Вступити до ліги
+    </button>
+</form>
+{% endif %}
 </div>
 
 {% if league.full_description %}

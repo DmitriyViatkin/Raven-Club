@@ -1,6 +1,8 @@
 from django.db import models
 from enums.enums import Status, Role
 from src.users.models import Player
+from typing import TYPE_CHECKING, List
+
 
 class League (models.Model):
 
@@ -22,7 +24,8 @@ class League (models.Model):
     create_by= models.ForeignKey(Player, on_delete= models.PROTECT,
                                  related_name='created_leagues' )
     create_at= models.DateField()
-
+    if TYPE_CHECKING:
+        ranked_members: List["LeagueMember"]
     class Meta:
         verbose_name = "League"
         verbose_name_plural = "Leagues"

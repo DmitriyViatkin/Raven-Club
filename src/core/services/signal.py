@@ -2,27 +2,18 @@ import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from src.tournaments.models import Match
-from src.core.services.services import calculate_points_for_match
+from src.core.services.services import calculate_round_results
 from src.results.models import MatchResult,Prediction
 logger = logging.getLogger(__name__)
 @receiver(post_save, sender=MatchResult)
-def match_result_post_save(sender, instance, created, **kwargs):
-    """
-    Сигнал, который вызывается после сохранения MatchResult.
-    Он инициирует расчет очков для всех прогнозов на этот матч.
-    """
-    match_id = instance.match.id
-    result = calculate_points_for_match(match_id)
-    if result["status"] == "error":
-        # Логируем ошибку или уведомляем администратора
-        logger.error(f"Ошибка при расчете очков для матча {match_id}: {result['message']}")
+def trigger_round_calculation(sender, instance, created, **kwargs):
+    round_obj = instance.match.round
 
-        #print(f"Ошибка при расчете очков для матча {match_id}: {result['message']}")
-    elif result["status"] == "info":
-        # Можно логировать информационные сообщения
-        logger.info(
-            "Информационное сообщение при расчете очков для матча %s: %s",
-            match_id,
-            result.get("message"),
-        )
-        #print(f"Информация: {result['message']}")
+    # Считаем только если результаты внесены для ВСЕХ матчей тура
+    total_matches = round_obj.matches.count()
+    matches_with_result = round_obj.matches.filter(
+        match_result__isnull=False
+    ).count()
+
+    if total_matches > 0 and total_matches == matches_with_result:
+        calculate_round_results(round_obj)

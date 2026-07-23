@@ -9,6 +9,42 @@ from .models import League, LeagueMember
 from src.tournaments.models import Round, Match, Tournament
 from src.results.models import Prediction
 from .forms import PredictionForm
+from django.db import IntegrityError
+
+
+
+class LeagueJoinView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        league = get_object_or_404(League, pk=pk)
+
+        if league.is_private:
+            messages.error(request, "Ця ліга приватна, потрібне запрошення.")
+            return redirect("predictions:league_detail", pk=league.pk)
+
+        try:
+            LeagueMember.objects.create(league=league, user=request.user)
+            messages.success(request, f"Ви вступили в лігу «{league.name}».")
+        except IntegrityError:
+            messages.info(request, "Ви вже є учасником цієї ліги.")
+
+        return redirect("predictions:league_detail", pk=league.pk)
+
+
+class LeagueLeaveView(LoginRequiredMixin, View):
+    def post(self, request, pk, *args, **kwargs):
+        league = get_object_or_404(League, pk=pk)
+
+        deleted, _ = LeagueMember.objects.filter(
+            league=league, user=request.user
+        ).delete()
+
+        if deleted:
+            messages.success(request, f"Ви вийшли з ліги «{league.name}».")
+        else:
+            messages.info(request, "Ви не є учасником цієї ліги.")
+
+        return redirect("predictions:league_detail", pk=league.pk)
+
 
 
 
@@ -145,9 +181,6 @@ class LeaguesListAll(LoginRequiredMixin,ListView):
         """ Получаем список лиг """
         return League.objects.all().distinct()
 
-
-
-
 class LeaguesList(LoginRequiredMixin,ListView):
 
     """ Список Турнірів в яких бере участь користувач. """
@@ -161,7 +194,6 @@ class LeaguesList(LoginRequiredMixin,ListView):
         """ Получаем список лиг """
         return League.objects.filter(members__user=self.request.user
                                      ).distinct()
-
 
 class LeagueDetail(LoginRequiredMixin, ListView):
     """Конкретна ліга + список турнірів у ній."""
