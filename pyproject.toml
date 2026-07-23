@@ -8,10 +8,13 @@ description = ""
 authors = [
     {name = "Dmitriy", email = "ViatkinDima@gmail.com"}
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0"
 dependencies = [
     "django (>=6.0,<7.0)",
-    "python-dotenv (>=1.2.2,<2.0.0)"
+    "python-dotenv (>=1.2.2,<2.0.0)",
+    "pillow (>=12.2.0,<13.0.0)",
+    "psycopg2-binary (>=2.9.12,<3.0.0)",
+    "django-unfold (>=0.99.0,<0.100.0)"
 ]
 
 [build-system]

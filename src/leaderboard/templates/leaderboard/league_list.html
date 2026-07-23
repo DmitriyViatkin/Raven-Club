@@ -1,0 +1,57 @@
+{% extends "base/index.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-8 space-y-8">
+
+    <h1 class="text-2xl font-bold text-white mb-4">Мои лиги</h1>
+
+    {% for league in leagues %}
+    <div class="bg-gray-800 border border-gray-600 rounded-lg overflow-hidden">
+
+        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-600">
+            <div class="flex items-center gap-3">
+                {% if league.logo %}
+                <img src="{{ league.logo.url }}" alt="{{ league.name }}" class="w-8 h-8 rounded-full object-cover">
+                {% endif %}
+                <h2 class="text-lg font-semibold text-white">{{ league.name }}</h2>
+            </div>
+            <a href="{% url 'leaderboard:league-standings' league.slug %}"
+               class="text-sm text-primary-600 hover:underline">
+                Вся таблица →
+            </a>
+        </div>
+
+        <table class="w-full text-white">
+            <thead class="bg-gray-800">
+                <tr class="text-gray-400 text-sm">
+                    <th class="px-4 py-2 text-left w-12">#</th>
+                    <th class="px-4 py-2 text-left">Игрок</th>
+                    <th class="px-4 py-2 text-right">Очки</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in league.ranked_members|slice:":5" %}
+                <tr class="border-t border-gray-600 {% if member.user == request.user %}bg-primary-600/20{% endif %}">
+                    <td class="px-4 py-2">{{ member.computed_rank }}</td>
+                    <td class="px-4 py-2">{{ member.user.username }}</td>
+                    <td class="px-4 py-2 text-right font-semibold">{{ member.total_points }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="px-4 py-4 text-center text-gray-400">
+                        Пока нет участников
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+    {% empty %}
+    <div class="bg-gray-800 border border-gray-600 rounded-lg px-4 py-6 text-center text-gray-400">
+        Вы пока не состоите ни в одной лиге.
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

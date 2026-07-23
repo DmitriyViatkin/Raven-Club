@@ -12,17 +12,18 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 import os
 import sys
-from django.conf.global_settings import STATIC_ROOT, STATICFILES_DIRS
+
 
 from pathlib import Path
 from dotenv import load_dotenv
+from .logging_config import get_logging_config
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, os.path.join(BASE_DIR, 'src'))
 load_dotenv(BASE_DIR/'.env')
-
+LOGGING = get_logging_config(BASE_DIR)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
@@ -30,22 +31,44 @@ load_dotenv(BASE_DIR/'.env')
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
-ALLOWED_HOSTS = []
+if DEBUG:
+    ALLOWED_HOSTS = []
+else:
+    # Здесь укажи домены своего продакшена, когда они появятся
+    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS','127.0.0.1,localhost').split(',')
+
+from .unfold import *
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL= ' /login'
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    #Unfold
+    'unfold',
+    'unfold.contrib.filters',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-]
+    'src.users',
+    'core',
+    'authentication',
+    'leaderboard',
+    'src.leagues',
+    'notifications',
+    'src.tournaments',
+    'src.results',
 
+]
+AUTH_USER_MODEL = 'users.Player'
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -61,7 +84,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR/'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -81,8 +104,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
@@ -122,3 +149,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+MEDIA_URL = 'media/'
+MEDIA_ROOT = BASE_DIR / 'media'

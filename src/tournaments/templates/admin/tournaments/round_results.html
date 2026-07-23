@@ -1,0 +1,140 @@
+{% extends "admin/base.html" %}
+{% load unfold %}
+{% load i18n %}
+{% load static %}
+{% block content %}
+<div class="p-4">
+  <h1 class="text-xl font-semibold mb-4 text-white">
+    {% trans "Введення результатів туру" %}: {{ round.name|default:round }}
+  </h1>
+
+  <form method="post" id="results-form">
+    {% csrf_token %}
+
+    <table class="w-full border-collapse">
+      <thead>
+        <tr class="text-left border-b border-gray-700 text-gray-300">
+          <th class="py-2">{% trans "Домашня команда" %}</th>
+          <th class="py-2 text-center">{% trans "Рахунок" %}</th>
+          <th class="py-2">{% trans "Гостьова команда" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for match in matches %}
+        <tr class="border-b border-gray-800 text-white">
+          <td class="py-3">{{ match.home_team }}</td>
+          <td class="py-3">
+            <div class="flex flex-col items-center gap-1">
+
+              <div class="flex items-center justify-center gap-2">
+                {% with current=match.match_result.home_ft %}
+                <div class="score-dropdown relative" data-name="home_{{ match.id }}">
+                  <button type="button"
+                          class="score-btn flex items-center justify-between gap-1 w-16 rounded-md bg-gray-800 border border-gray-600 text-white px-3 py-1.5 hover:border-primary-500">
+                    <span class="score-value">{% if current is not None %}{{ current }}{% else %}--{% endif %}</span>
+                    <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div class="score-list hidden absolute z-10 mt-1 w-16 max-h-48 overflow-y-auto rounded-md bg-gray-800 border border-gray-600 shadow-lg">
+                    <div class="score-option px-3 py-1.5 hover:bg-primary-600 cursor-pointer text-gray-400" data-value="">--</div>
+                    {% for i in score_range %}
+                      <div class="score-option px-3 py-1.5 hover:bg-primary-600 cursor-pointer {% if current == i %}bg-primary-700{% endif %}" data-value="{{ i }}">{{ i }}</div>
+                    {% endfor %}
+                  </div>
+                  <input type="hidden" name="home_{{ match.id }}" value="{% if current is not None %}{{ current }}{% endif %}">
+                </div>
+                {% endwith %}
+
+                <span class="text-gray-400">:</span>
+
+                {% with current=match.match_result.away_ft %}
+                <div class="score-dropdown relative" data-name="away_{{ match.id }}">
+                  <button type="button"
+                          class="score-btn flex items-center justify-between gap-1 w-16 rounded-md bg-gray-800 border border-gray-600 text-white px-3 py-1.5 hover:border-primary-500">
+                    <span class="score-value">{% if current is not None %}{{ current }}{% else %}--{% endif %}</span>
+                    <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div class="score-list hidden absolute z-10 mt-1 w-16 max-h-48 overflow-y-auto rounded-md bg-gray-800 border border-gray-600 shadow-lg">
+                    <div class="score-option px-3 py-1.5 hover:bg-primary-600 cursor-pointer text-gray-400" data-value="">--</div>
+                    {% for i in score_range %}
+                      <div class="score-option px-3 py-1.5 hover:bg-primary-600 cursor-pointer {% if current == i %}bg-primary-700{% endif %}" data-value="{{ i }}">{{ i }}</div>
+                    {% endfor %}
+                  </div>
+                  <input type="hidden" name="away_{{ match.id }}" value="{% if current is not None %}{{ current }}{% endif %}">
+                </div>
+                {% endwith %}
+              </div>
+
+              <label class="flex items-center gap-1 text-xs text-gray-400 cursor-pointer mt-1">
+                <input type="checkbox"
+                       name="has_pen_{{ match.id }}"
+                       class="pen-toggle"
+                       data-match-id="{{ match.id }}"
+                       {% if match.match_result.has_penalty_shootout %}checked{% endif %}>
+                {% trans "Серія пенальті" %}
+              </label>
+
+              <div class="pen-fields flex items-center gap-2 {% if not match.match_result.has_penalty_shootout %}hidden{% endif %}"
+                   data-match-id="{{ match.id }}">
+                {% with current=match.match_result.home_pen %}
+                <div class="score-dropdown relative" data-name="home_pen_{{ match.id }}">
+                  <button type="button"
+                          class="score-btn flex items-center justify-between gap-1 w-14 rounded-md bg-gray-800 border border-gray-600 text-white px-2 py-1 text-sm hover:border-primary-500">
+                    <span class="score-value">{% if current is not None %}{{ current }}{% else %}--{% endif %}</span>
+                    <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div class="score-list hidden absolute z-10 mt-1 w-14 max-h-40 overflow-y-auto rounded-md bg-gray-800 border border-gray-600 shadow-lg">
+                    <div class="score-option px-2 py-1 hover:bg-primary-600 cursor-pointer text-gray-400 text-sm" data-value="">--</div>
+                    {% for i in score_range %}
+                      <div class="score-option px-2 py-1 hover:bg-primary-600 cursor-pointer text-sm {% if current == i %}bg-primary-700{% endif %}" data-value="{{ i }}">{{ i }}</div>
+                    {% endfor %}
+                  </div>
+                  <input type="hidden" name="home_pen_{{ match.id }}" value="{% if current is not None %}{{ current }}{% endif %}">
+                </div>
+                {% endwith %}
+
+                <span class="text-gray-500 text-xs">{% trans "пен." %}</span>
+
+                {% with current=match.match_result.away_pen %}
+                <div class="score-dropdown relative" data-name="away_pen_{{ match.id }}">
+                  <button type="button"
+                          class="score-btn flex items-center justify-between gap-1 w-14 rounded-md bg-gray-800 border border-gray-600 text-white px-2 py-1 text-sm hover:border-primary-500">
+                    <span class="score-value">{% if current is not None %}{{ current }}{% else %}--{% endif %}</span>
+                    <svg class="w-3 h-3 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div class="score-list hidden absolute z-10 mt-1 w-14 max-h-40 overflow-y-auto rounded-md bg-gray-800 border border-gray-600 shadow-lg">
+                    <div class="score-option px-2 py-1 hover:bg-primary-600 cursor-pointer text-gray-400 text-sm" data-value="">--</div>
+                    {% for i in score_range %}
+                      <div class="score-option px-2 py-1 hover:bg-primary-600 cursor-pointer text-sm {% if current == i %}bg-primary-700{% endif %}" data-value="{{ i }}">{{ i }}</div>
+                    {% endfor %}
+                  </div>
+                  <input type="hidden" name="away_pen_{{ match.id }}" value="{% if current is not None %}{{ current }}{% endif %}">
+                </div>
+                {% endwith %}
+              </div>
+
+            </div>
+          </td>
+          <td class="py-3">{{ match.away_team }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <button type="submit"
+            class="mt-6 px-4 py-2 rounded bg-primary-600 text-white hover:bg-primary-700">
+      {% trans "Зберегти результати" %}
+    </button>
+  </form>
+</div>
+
+<script src="{% static 'JS/match_result.js' %}"></script>
+
+{% endblock %}

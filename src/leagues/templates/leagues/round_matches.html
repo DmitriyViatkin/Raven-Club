@@ -1,0 +1,40 @@
+{% extends "base/index.html" %}
+
+{% block content %}
+<div class="container">
+  <h2>Матчі туру: {{ round.name }}</h2>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Матч</th>
+        <th>Статус</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for match in matches %}
+      <tr>
+        <td>{{ match.home_team }} — {{ match.away_team }}</td>
+        <td>
+          {% if match.has_prediction %}
+            ✅ Прогноз зроблено
+          {% else %}
+            ❌ Прогноз не зроблено
+          {% endif %}
+        </td>
+        <td>
+          <a href="{% url 'predictions:create_prediction' match.id %}">
+            {% if match.has_prediction %}Редагувати{% else %}Зробити прогноз{% endif %}
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="3">У цьому турі поки немає матчів.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "base/index.html" %}
+{% block content %}
+<h1> Реістрація </h1>
+{% if form.errors%}
+<p> {{ form.errors }}</p>
+{% endif %}
+<form action = "{% url 'register'%}" method="post">
+    {{form}}
+    {% csrf_token %}
+    <button type="submit"> Приєднатися </button>
+</form>
+{% endblock%}
