@@ -33,11 +33,12 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
-if DEBUG:
-    ALLOWED_HOSTS = []
-else:
-    # Здесь укажи домены своего продакшена, когда они появятся
-    ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS','127.0.0.1,localhost').split(',')
+raw_hosts = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost,0.0.0.0')
+ALLOWED_HOSTS = [host.strip() for host in raw_hosts.split(',') if host.strip()]
+
+# Если нужно обязательно разрешить все хосты при DEBUG=True:
+if DEBUG and not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ['*']
 
 from .unfold import *
 
