@@ -1,40 +1,64 @@
 {% extends "base/index.html" %}
-
 {% block content %}
-<div class="container">
-  <h2>Матчі туру: {{ round.name }}</h2>
+<div style="max-width: 800px; margin: 0 auto; padding: 2rem 1rem;">
 
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Матч</th>
-        <th>Статус</th>
-        <th></th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for match in matches %}
-      <tr>
-        <td>{{ match.home_team }} — {{ match.away_team }}</td>
-        <td>
-          {% if match.has_prediction %}
-            ✅ Прогноз зроблено
+  <h2 class="font-display" style="text-align:center; color: var(--gold, #C9A84C); font-size: 1.6rem; margin-bottom: 2rem;">
+    Матчі туру: {{ round.name }}
+  </h2>
+
+  <div style="display:flex; flex-direction:column; gap:1rem;">
+    {% for match in matches %}
+    <div class="card" style="background: var(--crow-surface, #141416); border: 1px solid var(--crow-border, #2A2A2E); border-radius: 8px; padding: 1.2rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+
+      <!-- Команди -->
+      <div style="display:flex; align-items:center; gap:1rem; flex:1; justify-content:center;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:.4rem; width:110px;">
+          {% if match.home_team.logo %}
+            <img src="{{ match.home_team.logo.url }}" alt="{{ match.home_team.name }}" style="width:44px; height:44px; object-fit:contain;">
           {% else %}
-            ❌ Прогноз не зроблено
+            <div style="width:44px; height:44px; border-radius:50%; background: var(--crow-overlay, #1C1C1F); border:1px solid var(--crow-border, #2A2A2E);"></div>
           {% endif %}
-        </td>
-        <td>
-          <a href="{% url 'predictions:create_prediction' match.id %}">
-            {% if match.has_prediction %}Редагувати{% else %}Зробити прогноз{% endif %}
-          </a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="3">У цьому турі поки немає матчів.</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+          <span style="font-family:'Crimson Pro', serif; color: var(--text-primary, #eee); font-size:.85rem; text-align:center;">{{ match.home_team.name }}</span>
+        </div>
+
+        <span style="color: var(--gold, #C9A84C); font-family:'Playfair Display', serif; font-size:1.1rem;">—</span>
+
+        <div style="display:flex; flex-direction:column; align-items:center; gap:.4rem; width:110px;">
+          {% if match.away_team.logo %}
+            <img src="{{ match.away_team.logo.url }}" alt="{{ match.away_team.name }}" style="width:44px; height:44px; object-fit:contain;">
+          {% else %}
+            <div style="width:44px; height:44px; border-radius:50%; background: var(--crow-overlay, #1C1C1F); border:1px solid var(--crow-border, #2A2A2E);"></div>
+          {% endif %}
+          <span style="font-family:'Crimson Pro', serif; color: var(--text-primary, #eee); font-size:.85rem; text-align:center;">{{ match.away_team.name }}</span>
+        </div>
+      </div>
+
+      <!-- Статус -->
+      <div style="width:180px; text-align:center;">
+        {% if match.has_prediction %}
+          <span style="color:#4ade80; font-size:.85rem;">✅ Прогноз зроблено</span>
+        {% else %}
+          <span style="color:#f87171; font-size:.85rem;">❌ Прогноз не зроблено</span>
+        {% endif %}
+      </div>
+
+      <!-- Дія -->
+      <div style="width:160px; text-align:right;">
+        <a href="{% url 'predictions:create_prediction' match.id %}"
+           style="display:inline-block; padding:.5rem 1.2rem; background: var(--gold, #C9A84C); color:#0D0D0F; font-family:'Crimson Pro', serif; font-weight:600; font-size:.85rem; border-radius:4px; text-decoration:none; transition: background .2s;"
+           onmouseover="this.style.background='var(--gold-light, #DFC078)'"
+           onmouseout="this.style.background='var(--gold, #C9A84C)'">
+          {% if match.has_prediction %}Редагувати{% else %}Прогноз{% endif %}
+        </a>
+      </div>
+
+    </div>
+    {% empty %}
+    <div class="card" style="background: var(--crow-surface, #141416); border: 1px solid var(--crow-border, #2A2A2E); border-radius: 8px; padding: 2rem; text-align:center; color: var(--text-muted, #888);">
+      У цьому турі поки немає матчів.
+    </div>
+    {% endfor %}
+  </div>
+
 </div>
 {% endblock %}

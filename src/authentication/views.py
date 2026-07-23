@@ -4,6 +4,13 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import UserCreationForm
 from .forms import PlayerCreationForm
 
+from django.contrib.auth.views import LoginView
+
+
+class UserLoginView(LoginView):
+    template_name = 'registration/login1.html'
+    redirect_authenticated_user = True
+
 
 class Register(View):
     template_name = 'authentication/register.html'

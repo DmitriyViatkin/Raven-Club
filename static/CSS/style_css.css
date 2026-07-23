@@ -261,3 +261,16 @@
       from { transform: translateX(100%); opacity: 0; }
       to   { transform: none; opacity: 1; }
     }
+
+     input {
+    background: var(--crow-overlay, #1C1C1F);
+    border: 1px solid var(--crow-border, #2A2A2E);
+    color: var(--text-primary, #eee);
+    padding: .6rem .8rem;
+    border-radius: 4px;
+    font-family: 'Crimson Pro', serif;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--gold, #C9A84C);
+  }
