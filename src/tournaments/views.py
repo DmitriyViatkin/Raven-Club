@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Round, Tournament
 from src.results.models import MatchResult
 
-from leagues.models import LeagueMember
+from src.leagues.models import LeagueMember
 
 
 class LeagueMemberRequiredMixin:
@@ -31,9 +31,15 @@ class RoundResultsView(UnfoldModelAdminViewMixin, TemplateView):
     model_admin = None
 
     def dispatch(self, request, *args, **kwargs):
-        # Наша жесткая и безопасная проверка прав
-        if not request.user.has_perm("tournaments.change_match"):
-            raise PermissionDenied
+        match = self.get_match()
+        league = match.round.tournament.league
+
+        if not LeagueMember.objects.filter(
+                league=league,
+                user=request.user,
+        ).exists():
+            raise PermissionDenied("Ви не є учасником цієї ліги.")
+
         return super().dispatch(request, *args, **kwargs)
 
     def get_permission_required(self):
