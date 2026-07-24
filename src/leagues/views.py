@@ -11,7 +11,7 @@ from src.tournaments.models import Round, Match, Tournament
 from src.results.models import Prediction
 from .forms import PredictionForm
 from django.db import IntegrityError
-
+from src.tournaments.views import LeagueMemberRequiredMixin
 
 
 class LeagueJoinView(LoginRequiredMixin, View):
@@ -47,9 +47,8 @@ class LeagueLeaveView(LoginRequiredMixin, View):
         return redirect("predictions:league_detail", pk=league.pk)
 
 
-
-
-class RoundMatchListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+class RoundMatchListView(LoginRequiredMixin, LeagueMemberRequiredMixin,
+                          UserPassesTestMixin, ListView):
     """
     Список всех матчей раунда со статусом:
     сделал ли текущий пользователь прогноз на каждый матч.
@@ -58,6 +57,9 @@ class RoundMatchListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Match
     template_name = "leagues/round_matches.html"
     context_object_name = "matches"
+
+    def get_league(self):
+        return self.get_round().tournament.league
 
     def get_round(self):
         if not hasattr(self, "_round_obj"):
@@ -121,6 +123,9 @@ class PredictionEditView(LoginRequiredMixin, UpdateView):
                 pk=self.kwargs["match_id"],
             )
         return self._match_obj
+
+    def get_league(self):
+        return self.get_match().round.tournament.league
 
     def dispatch(self, request, *args, **kwargs):
         match = self.get_match()
@@ -187,12 +192,12 @@ class CurrentRoundRedirectView(LoginRequiredMixin, View):
 
         return redirect("predictions:round_matches", round_id=round_obj.id)
 
-class LeaguesListAll(LoginRequiredMixin,ListView):
 
-    """ Список Турнірів в яких бере участь користувач. """
+class LeaguesListAll(LoginRequiredMixin, ListView):
+    """ Список усіх ліг. """
 
     model = League
-    template_name =  "leagues/leagues_list.html"
+    template_name = "leagues/leagues_list.html"
     context_object_name = "leagues"
     paginate_by = 10
 
@@ -200,35 +205,35 @@ class LeaguesListAll(LoginRequiredMixin,ListView):
         """ Получаем список лиг """
         return League.objects.all().distinct()
 
-class LeaguesList(LoginRequiredMixin,ListView):
 
-    """ Список Турнірів в яких бере участь користувач. """
+class LeaguesList(LoginRequiredMixin, ListView):
+    """ Список ліг, у яких бере участь користувач. """
 
     model = League
-    template_name =  "leagues/leagues_list.html"
+    template_name = "leagues/leagues_list.html"
     context_object_name = "leagues"
     paginate_by = 10
 
     def get_queryset(self):
         """ Получаем список лиг """
-        return League.objects.filter(members__user=self.request.user
-                                     ).distinct()
+        return League.objects.filter(members__user=self.request.user).distinct()
+
 
 class LeagueDetail(LoginRequiredMixin, ListView):
     """Конкретна ліга + список турнірів у ній."""
 
     model = Tournament
-    template_name ="leagues/leagues_detail.html"
-    context_object_name =  "tournaments"
+    template_name = "leagues/leagues_detail.html"
+    context_object_name = "tournaments"
     paginate_by = 10
 
     def get_league(self):
-        if not hasattr(self, "_league_obj"):
+        if not hasattr(self, "_league"):
             self._league = get_object_or_404(
                 League.objects.prefetch_related("teams"),
                 pk=self.kwargs["pk"]
             )
-            return self._league
+        return self._league
 
     def get_queryset(self):
         return (

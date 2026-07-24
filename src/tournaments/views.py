@@ -7,6 +7,23 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Round, Tournament
 from src.results.models import MatchResult
 
+from leagues.models import LeagueMember
+
+
+class LeagueMemberRequiredMixin:
+    """
+    Проверяет, что пользователь — участник лиги, к которой относится турнир.
+    Наследник обязан реализовать get_league().
+    """
+    def get_league(self):
+        raise NotImplementedError("Реалізуйте get_league() у нащадку")
+
+    def dispatch(self, request, *args, **kwargs):
+        league = self.get_league()
+        if not LeagueMember.objects.filter(league=league, user=request.user).exists():
+            raise PermissionDenied("Ви не є учасником цієї ліги.")
+        return super().dispatch(request, *args, **kwargs)
+
 
 class RoundResultsView(UnfoldModelAdminViewMixin, TemplateView):
     template_name = "admin/tournaments/round_results.html"
@@ -85,8 +102,13 @@ class RoundResultsView(UnfoldModelAdminViewMixin, TemplateView):
         return redirect("admin:tournaments_round_changelist")
 
 
-class TournamentsDetail(LoginRequiredMixin, DetailView):
-
+class TournamentsDetail(LoginRequiredMixin, LeagueMemberRequiredMixin, DetailView):
     model = Tournament
     template_name = "tournaments/tournament_detail.html"
     context_object_name = "tournament"
+
+    def get_league(self):
+        # тут self.get_object() безопасен, DetailView сам подставит self.object позже,
+        # но на момент dispatch self.object ещё не установлен — берём напрямую
+        tournament = get_object_or_404(Tournament, pk=self.kwargs["pk"])
+        return tournament.league
