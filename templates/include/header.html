@@ -95,8 +95,10 @@
    <div x-show="mobileMenuOpen" x-transition style="border-top: 1px solid var(--crow-border); padding: 1rem 1.5rem 1.5rem;" class="md:hidden">
   <div class="flex flex-col gap-4">
     <a href="{% url 'index' %}" class="nav-link" @click="mobileMenuOpen = false">Ліги</a>
-    <a href="{% url 'index' %}" class="nav-link" @click="mobileMenuOpen = false">Турніри</a>
-    <a href="{% url 'index' %}" class="nav-link" @click="mobileMenuOpen = false">Лідерборд</a>
+    <a href="{% url 'predictions:leagues_all_list' %}" class="nav-link" @click="mobileMenuOpen = false">Всі ліги</a>
+    <a href="{% url 'predictions:current_round' %}" class="nav-link" @click="mobileMenuOpen = false">Турніри</a>
+
+    <a href="{% url 'leaderboard:league-list' %}" class="nav-link" @click="mobileMenuOpen = false">Лідерборд</a>
     {% if user.is_authenticated %}
     <a href="{% url 'user-profile' %}" class="nav-link" @click="mobileMenuOpen = false">Профіль</a>
     <form method="POST" action="{% url 'logout' %}">
