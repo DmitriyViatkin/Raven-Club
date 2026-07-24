@@ -128,21 +128,14 @@ class PredictionEditView(LoginRequiredMixin, UpdateView):
         return self.get_match().round.tournament.league
 
     def dispatch(self, request, *args, **kwargs):
+        print(f"[DEBUG] dispatch called, user={request.user}")
         match = self.get_match()
-
-        # Проверка членства в лиге — раньше всех остальных проверок
         league = match.round.tournament.league
-        if not LeagueMember.objects.filter(league=league, user=request.user).exists():
+        is_member = LeagueMember.objects.filter(league=league,
+                                                user=request.user).exists()
+        print(f"[DEBUG] league={league}, is_member={is_member}")
+        if not is_member:
             raise PermissionDenied("Ви не є учасником цієї ліги.")
-
-        # Проверка дедлайна — до того, как что-либо рендерить/сохранять
-        if match.round.is_locked or (
-                match.round.deadline and timezone.now() > match.round.deadline
-        ):
-            messages.error(request, "Приём прогнозів на цей тур закрито.")
-            return redirect("tournaments:round_matches", round_id=match.round_id)
-
-        return super().dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         match = self.get_match()
