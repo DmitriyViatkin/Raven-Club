@@ -39,7 +39,8 @@ ALLOWED_HOSTS = [host.strip() for host in raw_hosts.split(',') if host.strip()]
 # Если нужно обязательно разрешить все хосты при DEBUG=True:
 if DEBUG and not ALLOWED_HOSTS:
     ALLOWED_HOSTS = ['*']
-
+raw_csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', '')
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in raw_csrf_origins.split(',') if origin.strip()]
 from .unfold import *
 
 LOGIN_REDIRECT_URL = '/'
