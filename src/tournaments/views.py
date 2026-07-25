@@ -30,17 +30,7 @@ class RoundResultsView(UnfoldModelAdminViewMixin, TemplateView):
     title = "Введення результатів туру"
     model_admin = None
 
-    def dispatch(self, request, *args, **kwargs):
-        match = self.get_match()
-        league = match.round.tournament.league
 
-        if not LeagueMember.objects.filter(
-                league=league,
-                user=request.user,
-        ).exists():
-            raise PermissionDenied("Ви не є учасником цієї ліги.")
-
-        return super().dispatch(request, *args, **kwargs)
 
     def get_permission_required(self):
         # Заглушаем внутренние требования Unfold, возвращая пустой список прав

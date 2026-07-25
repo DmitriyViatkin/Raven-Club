@@ -128,14 +128,14 @@ class PredictionEditView(LoginRequiredMixin, UpdateView):
         return self.get_match().round.tournament.league
 
     def dispatch(self, request, *args, **kwargs):
-        print(f"[DEBUG] dispatch called, user={request.user}")
         match = self.get_match()
         league = match.round.tournament.league
-        is_member = LeagueMember.objects.filter(league=league,
-                                                user=request.user).exists()
-        print(f"[DEBUG] league={league}, is_member={is_member}")
+        is_member = LeagueMember.objects.filter(
+            league=league, user=request.user
+        ).exists()
         if not is_member:
             raise PermissionDenied("Ви не є учасником цієї ліги.")
+        return super().dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):
         match = self.get_match()
