@@ -130,11 +130,21 @@ class PredictionEditView(LoginRequiredMixin, UpdateView):
     def dispatch(self, request, *args, **kwargs):
         match = self.get_match()
         league = match.round.tournament.league
+
         is_member = LeagueMember.objects.filter(
             league=league, user=request.user
         ).exists()
         if not is_member:
             raise PermissionDenied("Ви не є учасником цієї ліги.")
+
+        round_obj = match.round
+        if round_obj.is_locked or round_obj.deadline <= timezone.now():
+            messages.error(
+                request,
+                "Дедлайн для прогнозів на цей тур вже минув."
+            )
+            return redirect("predictions:round_matches", round_id=round_obj.id)
+
         return super().dispatch(request, *args, **kwargs)
 
     def get_object(self, queryset=None):

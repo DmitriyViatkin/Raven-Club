@@ -2,7 +2,7 @@
     <nav class="max-w-screen-xl mx-auto px-6 flex items-center justify-between h-16">
 
       <!-- Logo -->
-      <a href="{% url 'index' %}" class="flex items-center gap-3 no-underline">
+      <a href="{% url 'predictions:leagues_all_list' %}" class="flex items-center gap-3 no-underline">
         <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M26 8c-1.5-2-4-3-7-2.5C15 6 12 8 10 11c-2 3-2.5 6.5-1 9.5 1 2.2 3 4 5.5 4.5L12 28h2l1.5-3.5c.5.1 1 .1 1.5.1 4.5 0 8.5-3.5 9-8 .3-2.8-.8-5.6-2.5-7.5L27 7l-1 1z" fill="#C9A84C" opacity=".9"/>
           <circle cx="22" cy="11" r="1.5" fill="#0D0D0F"/>
@@ -21,9 +21,9 @@
       <!-- Desktop nav links (unauthenticated) -->
       {% if not user.is_authenticated %}
       <div class="hidden md:flex items-center gap-8">
-        <a href="{% url 'index' %}" class="nav-link">Ліги</a>
-        <a href="{% url 'index' %}" class="nav-link">Турніри</a>
-        <a href="{% url 'index' %}" class="nav-link">Лідерборд</a>
+        <a href="{% url 'predictions:leagues_all_list' %}" class="nav-link">Ліги</a>
+       <!-- <a href="{% url 'index' %}" class="nav-link">Турніри</a> -->
+        <a href="{% url 'predictions:leaderboard' %}" class="nav-link">Лідерборд</a>
       </div>
       <div class="hidden md:flex items-center gap-3">
         <a href="{% url 'login' %}" class="btn-outline" style="padding: 0.4rem 1rem;">Увійти</a>
@@ -41,7 +41,7 @@
         </div>
 
         <!-- Notifications bell -->
-        <a href="{% url 'index' %}" class="relative" style="color: var(--text-muted); transition: color .2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-muted)'">
+        <a href="{% url 'predictions:leagues_all_list' %}" class="relative" style="color: var(--text-muted); transition: color .2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text-muted)'">
           <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
           </svg>
@@ -94,9 +94,9 @@
     <!-- Mobile menu -->
    <div x-show="mobileMenuOpen" x-transition style="border-top: 1px solid var(--crow-border); padding: 1rem 1.5rem 1.5rem;" class="md:hidden">
   <div class="flex flex-col gap-4">
-    <a href="{% url 'index' %}" class="nav-link" @click="mobileMenuOpen = false">Ліги</a>
-    <a href="{% url 'predictions:leagues_all_list' %}" class="nav-link" @click="mobileMenuOpen = false">Всі ліги</a>
-    <a href="{% url 'predictions:current_round' %}" class="nav-link" @click="mobileMenuOpen = false">Турніри</a>
+    <a href="{% url 'predictions:leagues_all_list' %}" class="nav-link" @click="mobileMenuOpen = false">Ліги</a>
+    <a href="{% url 'predictions:leagues_list' %}" class="nav-link" @click="mobileMenuOpen = false">Всі ліги</a>
+    <!-- <a href="{% url 'predictions:current_round' %}" class="nav-link" @click="mobileMenuOpen = false">Турніри</a> -->
 
     <a href="{% url 'leaderboard:league-list' %}" class="nav-link" @click="mobileMenuOpen = false">Лідерборд</a>
     {% if user.is_authenticated %}
