@@ -85,31 +85,49 @@
       </tbody>
     </table>
 
-    <div class="grid grid-cols-2 gap-4 mb-6 max-w-md">
-      <label class="flex items-center gap-2 text-gray-300 cursor-pointer rounded-md bg-gray-800 border border-gray-600 px-3 py-2">
-        <input type="checkbox" name="{{ form.home_scored.html_name }}" id="{{ form.home_scored.id_for_label }}"
-               class="accent-primary-600" {% if form.home_scored.value %}checked{% endif %}>
-        {{ match.home_team }} {% trans "забиває" %}
-      </label>
+        <div class="grid grid-cols-2 gap-4 mb-6 max-w-md"
+               x-data="{
+                  homeScored: {{ form.home_scored.value|yesno:'true,false' }},
+                  awayScored: {{ form.away_scored.value|yesno:'true,false' }},
+                  homeClean: {{ form.home_clean_sheet.value|yesno:'true,false' }},
+                  awayClean: {{ form.away_clean_sheet.value|yesno:'true,false' }},
+               }">
 
-      <label class="flex items-center gap-2 text-gray-300 cursor-pointer rounded-md bg-gray-800 border border-gray-600 px-3 py-2">
-        <input type="checkbox" name="{{ form.away_scored.html_name }}" id="{{ form.away_scored.id_for_label }}"
-               class="accent-primary-600" {% if form.away_scored.value %}checked{% endif %}>
-        {{ match.away_team }} {% trans "забиває" %}
-      </label>
+            <label class="flex items-center gap-2 text-gray-300 cursor-pointer rounded-md bg-gray-800 border border-gray-600 px-3 py-2">
+              <input type="checkbox" name="{{ form.home_scored.html_name }}" id="{{ form.home_scored.id_for_label }}"
+                     class="accent-primary-600"
+                     x-model="homeScored"
+                     @change="if (homeScored) { awayClean = false }">
+              {{ match.home_team }} {% trans "забиває" %}
+            </label>
 
-      <label class="flex items-center gap-2 text-gray-300 cursor-pointer rounded-md bg-gray-800 border border-gray-600 px-3 py-2">
-        <input type="checkbox" name="{{ form.home_clean_sheet.html_name }}" id="{{ form.home_clean_sheet.id_for_label }}"
-               class="accent-primary-600" {% if form.home_clean_sheet.value %}checked{% endif %}>
-        {{ match.home_team }} {% trans "суха гра" %}
-      </label>
+            <label class="flex items-center gap-2 text-gray-300 cursor-pointer rounded-md bg-gray-800 border border-gray-600 px-3 py-2">
+              <input type="checkbox" name="{{ form.away_scored.html_name }}" id="{{ form.away_scored.id_for_label }}"
+                     class="accent-primary-600"
+                     x-model="awayScored"
+                     @change="if (awayScored) { homeClean = false }">
+              {{ match.away_team }} {% trans "забиває" %}
+            </label>
 
-      <label class="flex items-center gap-2 text-gray-300 cursor-pointer rounded-md bg-gray-800 border border-gray-600 px-3 py-2">
-        <input type="checkbox" name="{{ form.away_clean_sheet.html_name }}" id="{{ form.away_clean_sheet.id_for_label }}"
-               class="accent-primary-600" {% if form.away_clean_sheet.value %}checked{% endif %}>
-        {{ match.away_team }} {% trans "суха гра" %}
-      </label>
-    </div>
+            <label class="flex items-center gap-2 rounded-md bg-gray-800 border border-gray-600 px-3 py-2"
+                   :class="awayScored ? 'text-gray-600 cursor-not-allowed opacity-50' : 'text-gray-300 cursor-pointer'">
+              <input type="checkbox" name="{{ form.home_clean_sheet.html_name }}" id="{{ form.home_clean_sheet.id_for_label }}"
+                     class="accent-primary-600"
+                     x-model="homeClean"
+                     :disabled="awayScored">
+              {{ match.home_team }} {% trans "суха гра" %}
+            </label>
+
+            <label class="flex items-center gap-2 rounded-md bg-gray-800 border border-gray-600 px-3 py-2"
+                   :class="homeScored ? 'text-gray-600 cursor-not-allowed opacity-50' : 'text-gray-300 cursor-pointer'">
+              <input type="checkbox" name="{{ form.away_clean_sheet.html_name }}" id="{{ form.away_clean_sheet.id_for_label }}"
+                     class="accent-primary-600"
+                     x-model="awayClean"
+                     :disabled="homeScored">
+              {{ match.away_team }} {% trans "суха гра" %}
+            </label>
+
+        </div>
 
     <div class="flex items-center gap-3">
       <button type="submit"
