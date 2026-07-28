@@ -16,6 +16,8 @@ import sys
 
 from pathlib import Path
 from dotenv import load_dotenv
+
+import leagues
 from .logging_config import get_logging_config
 
 
