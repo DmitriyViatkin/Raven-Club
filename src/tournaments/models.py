@@ -49,7 +49,7 @@ class Team(models.Model):
     """ Модель футбольного клубу """
 
     name = models.CharField(max_length=250, unique=True)
-    logo = models.ImageField(upload_to='media/teams/', blank=True, null=True)
+    logo = models.ImageField(upload_to='teams/', blank=True, null=True)
 
     class Meta:
         verbose_name = "Команда"
