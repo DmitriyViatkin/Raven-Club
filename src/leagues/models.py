@@ -17,7 +17,7 @@ class League (models.Model):
     slug=models.CharField(max_length=100, unique=True)
     short_description=models.CharField(max_length=300)
     full_description=models.TextField()
-    logo= models.ImageField(upload_to='media/leagues/', blank=True, null=True)
+    logo= models.ImageField(upload_to='leagues/', blank=True, null=True)
     is_private= models.BooleanField()
     status= models.CharField(max_length=20, choices =Status.choices(),
                              default=Status.draft.value)
