@@ -12,6 +12,8 @@ from src.results.models import Prediction
 from .forms import PredictionForm
 from django.db import IntegrityError
 from src.tournaments.views import LeagueMemberRequiredMixin
+from collections import defaultdict
+
 
 
 class LeagueJoinView(LoginRequiredMixin, View):
@@ -58,6 +60,42 @@ class RoundMatchListView(LoginRequiredMixin, LeagueMemberRequiredMixin,
     template_name = "leagues/round_matches.html"
     context_object_name = "matches"
 
+    def get_summary_stats(self, round_obj):
+        """% побед/ничьих по каждому матчу тура (сводная таблица)."""
+        rows = (
+            Prediction.objects.filter(match__round=round_obj)
+            .values("match_id")
+            .annotate(
+                total=Count("id"),
+                home_win=Count("id", filter=Q(home_ft__gt=F("away_ft"))),
+                draw=Count("id", filter=Q(home_ft=F("away_ft"))),
+                away_win=Count("id", filter=Q(home_ft__lt=F("away_ft"))),
+            )
+        )
+        stats_by_match = {}
+        for row in rows:
+            total = row["total"] or 1
+            stats_by_match[row["match_id"]] = {
+                "total": row["total"],
+                "home_win_pct": round(row["home_win"] / total * 100, 1),
+                "draw_pct": round(row["draw"] / total * 100, 1),
+                "away_win_pct": round(row["away_win"] / total * 100, 1),
+            }
+        return stats_by_match
+
+    def get_predictions_by_user(self, round_obj):
+        """Прогнозы всех пользователей по всем матчам тура, сгруппированные по игроку."""
+        predictions = (
+            Prediction.objects.filter(match__round=round_obj)
+            .select_related("user", "match__home_team", "match__away_team")
+            .order_by("user__username", "match_id")
+        )
+        grouped = defaultdict(list)
+        for pred in predictions:
+            grouped[pred.user.username].append(pred)
+        return dict(grouped)
+
+
     def get_league(self):
         return self.get_round().tournament.league
 
@@ -100,8 +138,16 @@ class RoundMatchListView(LoginRequiredMixin, LeagueMemberRequiredMixin,
         ).values_list("match_id", flat=True)
         predicted_match_ids = set(user_predictions)
 
+        summary_stats = self.get_summary_stats(round_obj)
+
         for match in context["matches"]:
             match.has_prediction = match.id in predicted_match_ids
+            match.stats = summary_stats.get(match.id, {
+                "total": 0, "home_win_pct": 0, "draw_pct": 0, "away_win_pct": 0,
+            })
+
+        context["predictions_by_user"] = self.get_predictions_by_user(round_obj)
+
         return context
 
 
