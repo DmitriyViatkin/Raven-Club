@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.views.generic import ListView, UpdateView, View
 from django.contrib import messages
 from .models import League, LeagueMember
-
+from django.db.models import Q, Count, F, Sum
 from src.tournaments.models import Round, Match, Tournament
 from src.results.models import Prediction
 from .forms import PredictionForm
@@ -116,6 +116,23 @@ class PredictionEditView(LoginRequiredMixin, UpdateView):
     form_class = PredictionForm
     template_name = "leagues/create_prediction.html"
 
+
+
+    def get_match_stats(self,match):
+
+        qs = Prediction.objects.filter(match=match).select_related('user')
+        stats = qs.aggregate(
+            total=Count("id"),
+            home_win=Count("id", filter= Q(home_ft__gt=F("away_ft"))),
+            draw=Count("id", filter= Q(home_ft=F("away_ft"))),
+            away_win=Count("id", filter=Q(home_ft__lt=F("away_ft")))
+        )
+        total = stats['total'] or 1  # Avoid division by zero
+        stats['home_win_pct'] = (round(stats['home_win'] / total * 100,1))
+        stats['draw_pct'] = (round(stats['draw'] / total * 100,1))
+        stats['away_win_pct'] = (round(stats['away_win'] / total * 100,1))
+        return stats
+
     def get_match(self):
         if not hasattr(self, "_match_obj"):
             self._match_obj = get_object_or_404(
@@ -167,8 +184,16 @@ class PredictionEditView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        match = self.get_match()
         context["match"] = self.get_match()
         context["score_range"] = range(0, 11)
+        context["match_stats"] = self.get_match_stats(match)
+        context["other_predictions"] = (
+            Prediction.objects.filter(match=match)
+            .exclude(user=self.request.user)
+            .select_related("user")
+            .order_by("user__username")
+        )
         return context
 
     def get_success_url(self):

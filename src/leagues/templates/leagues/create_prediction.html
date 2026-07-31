@@ -131,7 +131,7 @@
 
     <div class="flex items-center gap-3">
       <button type="submit"
-              class="px-4 py-2 rounded bg-primary-600 text-white hover:bg-primary-700">
+              class="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700">
         {% trans "Зберегти прогноз" %}
       </button>
       <a href="{% url 'predictions:round_matches' round_id=match.round_id %}"
@@ -140,6 +140,61 @@
       </a>
     </div>
   </form>
+</div>
+
+<div class="match-stats">
+    <h3>Статистика прогнозів ({{ match_stats.total }} усього)</h3>
+
+    <div class="stats-container">
+    <div class="stat-row">
+        <span>Перемога {{ match.home_team }}</span>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ match_stats.home_win_pct }}%;"></div>
+        </div>
+        <span>{{ match_stats.home_win }} ({{ match_stats.home_win_pct }}%)</span>
+    </div>
+
+    <div class="stat-row">
+        <span>Нічия</span>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ match_stats.draw_pct }}%;"></div>
+        </div>
+        <span>{{ match_stats.draw }} ({{ match_stats.draw_pct }}%)</span>
+    </div>
+
+    <div class="stat-row">
+        <span>Перемога {{ match.away_team }}</span>
+        <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ match_stats.away_win_pct }}%;"></div>
+        </div>
+        <span>{{ match_stats.away_win }} ({{ match_stats.away_win_pct }}%)</span>
+    </div>
+</div>
+
+<!-- Прогнозы других пользователей -->
+<div class="other-predictions">
+    <h3>Прогнози інших учасників</h3>
+
+    {% if other_predictions %}
+    <table>
+        <thead>
+            <tr>
+                <th>Гравець</th>
+                <th>Прогноз</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pred in other_predictions %}
+            <tr>
+                <td>{{ pred.user.username }}</td>
+                <td>{{ pred.home_ft }} : {{ pred.away_ft }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Поки що ніхто не зробив прогноз на цей матч.</p>
+    {% endif %}
 </div>
 
 <script src="{% static 'JS/match_result.js' %}"></script>

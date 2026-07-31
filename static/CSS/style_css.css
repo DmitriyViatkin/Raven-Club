@@ -274,3 +274,67 @@
     outline: none;
     border-color: var(--gold, #C9A84C);
   }
+
+  /* Контейнер для вирівнювання блоків в один рядок і по центру */
+.stats-container {
+    display: flex;
+    justify-content: center; /* Центрує блоки по горизонталі */
+    align-items: center;     /* Вирівнює їх по вертикалі */
+    gap: 20px;               /* Відстань між блоками */
+    width: 100%;
+}
+
+/* Налаштування для кожного окремого блоку */
+.stat-row {
+    display: flex;
+    flex-direction: column;  /* Елементи всередині блоку стають один під одним */
+    align-items: center;     /* Центрує текст і прогрес-бар всередині блоку */
+    text-align: center;
+    min-width: 150px;        /* За бажанням: мінімальна ширина для краси */
+}
+
+/* Базові стилі для прогрес-барів (якщо ще не задані) */
+.progress-bar {
+    width: 100%;
+    max-width: 200px;
+    height: 10px;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 6px 0;          /* Відступи зверху та знизу від прогрес-бару */
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #4caf50; /* Колір заповнення */
+    transition: width 0.3s ease;
+}
+
+/* Блок-обгортка: центрує весь свій вміст */
+.other-predictions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;    /* Центрує заголовок, таблицю та текст по горизонталі */
+    text-align: center;     /* Центрує текст всередині заголовка та <p> */
+    width: 100%;
+    margin-top: 30px;
+}
+
+/* Налаштування для заголовочка */
+.other-predictions h3 {
+    margin-bottom: 15px;
+}
+
+/* Налаштування для таблиці */
+.predictions-table {
+    margin: 0 auto;         /* Центрує таблицю, якщо вона має фіксовану ширину */
+    border-collapse: collapse;
+    min-width: 300px;       /* Мінімальна ширина для гарного вигляду */
+}
+
+/* Центруємо текст всередині комірок таблиці */
+.predictions-table th,
+.predictions-table td {
+    padding: 8px 16px;
+    text-align: center;
+}
