@@ -47,6 +47,32 @@ class LeagueMember (models.Model):
         verbose_name = "League Member"
         verbose_name_plural = "League Members"
 
+class UserLeaguePoints(models.Model):
+    league_member = models.ForeignKey(
+        LeagueMember, on_delete=models.CASCADE, related_name='points'
+    )
+    match = models.ForeignKey(
+        "tournaments.Match", on_delete=models.CASCADE, related_name='league_points'
+    )
+    point_correct_winner = models.IntegerField(default=0)
+    point_correct_diff = models.IntegerField(default=0)
+    point_exact_score = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('league_member', 'match')
+        ordering = ['-created_at']
+        verbose_name = "User League Points"
+        verbose_name_plural = "User League Points"
+
+    @property
+    def points(self) -> int:
+        return (
+            self.point_correct_winner
+            + self.point_correct_diff
+            + self.point_exact_score
+        )
+
 class ScoringRules(models.Model):
 
     league= models.ForeignKey(League, on_delete= models.CASCADE)
