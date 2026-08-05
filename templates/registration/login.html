@@ -1,15 +1,89 @@
 {% extends "base/index.html" %}
+{% load static %}
 
 {% block title %}Увійти{% endblock %}
 
 {% block content %}
+<div class="max-w-md mx-auto my-12 px-4">
+  <div class="bg-crow-surface border border-crow-border rounded-lg p-8 shadow-2xl relative overflow-hidden">
+    <!-- Золота акцентна лінія вгорі картки -->
+    <div class="absolute top-0 left-0 right-0 h-[2px] bg-gold-line"></div>
 
-{% if form.errors%}
-<p> {{ form.errors }}</p>
-{% endif %}
- <form action="{% url 'login' %}" method="post">
-  {{ form }}
-    {% csrf_token %}
-<button type="submit" class="btn-gold mt-4">Увійти</button>
-     </form>
+    <h2 class="font-display text-2xl text-gold mb-6 text-center">Вхід до клубу</h2>
+
+    <!-- Загальні помилки форми -->
+    {% if form.non_field_errors %}
+      <div class="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded text-red-400 text-xs font-mono">
+        {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form action="{% url 'login' %}" method="post" class="space-y-4">
+      {% csrf_token %}
+
+      <!-- Поле Username / Email -->
+      <div>
+        <label for="{{ form.username.id_for_label }}" class="block font-body text-sm font-medium text-gray-300 mb-1.5">
+          Логін або Email
+        </label>
+        <input
+          type="text"
+          name="{{ form.username.name }}"
+          id="{{ form.username.id_for_label }}"
+          value="{{ form.username.value|default:'' }}"
+          required
+          class="w-full px-4 py-2.5 bg-crow-overlay border border-crow-border rounded text-white font-mono text-sm placeholder-gray-500 focus:outline-none focus:border-gold transition-colors duration-200"
+        >
+        {% if form.username.errors %}
+          <p class="text-red-400 text-xs font-mono mt-1">{{ form.username.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Поле Пароль -->
+      <div>
+        <div class="flex justify-between items-center mb-1.5">
+          <label for="{{ form.password.id_for_label }}" class="block font-body text-sm font-medium text-gray-300">
+            Пароль
+          </label>
+          <!-- ПОСИЛАННЯ "ЗАБУЛИ ПАРОЛЬ?" -->
+          <a href="{% url 'password_reset' %}" class="text-xs text-gold hover:underline font-body">
+            Забули пароль?
+          </a>
+        </div>
+        <input
+          type="password"
+          name="{{ form.password.name }}"
+          id="{{ form.password.id_for_label }}"
+          required
+          class="w-full px-4 py-2.5 bg-crow-overlay border border-crow-border rounded text-white font-mono text-sm placeholder-gray-500 focus:outline-none focus:border-gold transition-colors duration-200"
+        >
+        {% if form.password.errors %}
+          <p class="text-red-400 text-xs font-mono mt-1">{{ form.password.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Кнопка Входу -->
+      <button
+        type="submit"
+        class="w-full py-3 px-4 bg-gold hover:bg-gold-light text-crow font-semibold rounded transition-colors duration-200 shadow-md mt-2"
+      >
+        Увійти
+      </button>
+    </form>
+
+    <!-- БЛОК "РЕЄСТРАЦІЯ" -->
+    <div class="mt-8 pt-6 border-t border-crow-border text-center">
+      <p class="text-xs text-gray-400 font-body mb-3">Ще не маєте акаунту?</p>
+      <a
+        href="{% url 'register' %}"
+        class="inline-block w-full py-2.5 px-4 bg-crow-overlay border border-crow-border text-gray-300 hover:text-gold hover:border-gold/50 rounded text-sm transition-colors duration-200"
+      >
+        Зареєструватися
+      </a>
+    </div>
+
+  </div>
+</div>
 {% endblock %}

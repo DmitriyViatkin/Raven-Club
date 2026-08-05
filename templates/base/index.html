@@ -65,6 +65,7 @@
     <!-- Main content -->
 
     <main class="flex-1 px-6 lg:px-10 py-8 relative" id="main-content">
+           {% block page_header %}{% endblock %}
 {% block content%}
       <!-- Django messages -->
       {% if messages %}
@@ -80,7 +81,7 @@
       {% endif %}
 
       <!-- Page header block -->
-      {% block page_header %}{% endblock %}
+
 
       <!-- Main content block -->
 
