@@ -16,20 +16,17 @@ class AsyncPasswordResetForm(PasswordResetForm):
         html_email_template_name: str | None = None,
         user_email: str | None = None
     ) -> None:
-
         context_dict = dict(context)
-
-        if "user" in context_dict:
-            del context_dict["user"]
-
+        user = context_dict.pop("user", None)
         send_password_reset_email_task.delay(
-                                         subject_template_name=subject_template_name,
-                                         email_template_name=email_template_name,
-                                         context=context_dict,
-                                         from_email=from_email,
-                                         to_email=to_email,
-                                         html_email_template_name=html_email_template_name,
-                                             )
+            subject_template_name=subject_template_name,
+            email_template_name=email_template_name,
+            context=context_dict,
+            from_email=from_email,
+            to_email=to_email,
+            html_email_template_name=html_email_template_name,
+            user_id=user.pk if user else None,
+        )
 class PlayerCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = get_user_model()
