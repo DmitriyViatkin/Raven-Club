@@ -1,39 +1,47 @@
 # predictions/services.py
-from django.db.models import Sum
+
+from django.db import transaction
+
+from src.leagues.models import UserLeaguePoints
 
 from src.results.models import  Prediction
 from src.leagues.models import LeagueMember
 
 
-def calculate_points(prediction, result):
-    """Ваша логика начисления баллов по ScoringRules."""
-    league = prediction.tournament.league
-    rules = league.scoringrules_set.first()  # или как у вас связано
+def calculate_points(prediction, result, rules) -> dict:
+    """
+    Обчислює бали за категоріями згідно з ScoringRules.
+    Якщо вгадано точний рахунок — додаються бали за всіма трьома категоріями.
+    Якщо ні — окремо перевіряються переможець та різниця.
+    """
+    pts_exact = 0
+    pts_winner = 0
+    pts_diff = 0
 
-    points = 0
-
-    # точный счёт
+    # 1. Точний рахунок (включає в себе і переможця, і різницю)
     if prediction.home_ft == result.home_ft and prediction.away_ft == result.away_ft:
-        points += rules.point_exact_score
+
+        pts_exact = rules.point_exact_score
+        pts_winner = rules.point_correct_winner
+        pts_diff = rules.point_correct_diff
     else:
-        # правильный победитель
+        # 2. Вгаданий переможець або нічия
         pred_winner = _winner(prediction.home_ft, prediction.away_ft)
         if pred_winner == result.winner:
-            points += rules.point_correct_winner
-        # правильная разница
-        if (prediction.home_ft - prediction.away_ft) == (result.home_ft - result.away_ft):
-            points += rules.point_correct_diff
 
-    if prediction.home_scored and result.home_scored:
-        points += rules.points_home_scored
-    if prediction.away_scored and result.away_scored:
-        points += rules.points_away_scored
-    if prediction.home_clean_sheet and result.home_clean_sheet:
-        points += rules.points_home_clean_sheet
-    if prediction.away_clean_sheet and result.away_clean_sheet:
-        points += rules.points_away_clean_sheet
+            pts_winner = rules.point_correct_winner
 
-    return points
+        # 3. Вгадана різниця м'ячів (працює і для нічиїх, наприклад: 1:1 та 2:2 має різницю 0)
+        if abs(prediction.home_ft - prediction.away_ft) == abs(result.home_ft - result.away_ft):
+
+
+            pts_diff = rules.point_correct_diff
+
+    return {
+        "point_exact_score": pts_exact,
+        "point_correct_winner": pts_winner,
+        "point_correct_diff": pts_diff,
+    }
 
 
 def _winner(home, away):
@@ -43,9 +51,10 @@ def _winner(home, away):
         return "away"
     return None
 
-
+@transaction.atomic
 def calculate_round_results(round_obj):
-    """Считает очки для всех прогнозов тура и обновляет таблицы затронутых лиг."""
+    """Рахує бали для всіх прогнозів туру і оновлює UserLeaguePoints
+     + LeagueMember затронутих ліг."""
     touched_leagues = set()
 
     matches = round_obj.matches.select_related("match_result")
@@ -55,27 +64,41 @@ def calculate_round_results(round_obj):
         if not result:
             continue
 
-        predictions = match.predictions.select_related("tournament__league")
+        predictions = match.predictions.select_related("tournament__league").select_related("user")
 
         for prediction in predictions:
-            prediction.points_earned = calculate_points(prediction, result)
-            prediction.is_calculated = True
-            prediction.save(update_fields=["points_earned", "is_calculated"])
-            touched_leagues.add(prediction.tournament.league_id)
+            league = prediction.tournament.league
+            rules = getattr(league, "scoring_rules", None)
+            if not rules:
+                raise ValueError(f"Scoring rules not found for league {league.id}")
+            league_member, _ = LeagueMember.objects.get_or_create(
+                league=league, user=prediction.user)
+            breakdown = calculate_points(prediction, result, rules)
+            UserLeaguePoints.objects.update_or_create(
+                league_member=league_member,
+                prediction=prediction,
+                defaults=breakdown,
+            )
 
+            prediction.is_calculated = True
+            prediction.save(update_fields=["is_calculated"])
+            touched_leagues.add(league.id)
     from src.leagues.models import League
     for league in League.objects.filter(id__in=touched_leagues):
         recalc_league_points(league)
 
-
+@transaction.atomic
 def recalc_league_points(league):
+    """Перераховує total_points для всіх учасників ліги на основі UserLeaguePoints."""
+    category_fields = ["point_exact_score",
+                       "point_correct_winner", "point_correct_diff"]
+    totals = {}
+    for row in UserLeaguePoints.objects.filter(league_member__league=league).values(
+        "league_member_id", *category_fields):
+        member_id = row["league_member_id"]
+        totals[member_id] = (totals.get(member_id, 0) +
+                             sum(row[field] for field in category_fields))
     members = list(league.members.all())
     for member in members:
-        total = Prediction.objects.filter(
-            user=member.user,
-            tournament__league=league,
-            is_calculated=True,
-        ).aggregate(s=Sum("points_earned"))["s"] or 0
-        member.total_points = total
-
+        member.total_points = totals.get(member.id, 0)
     LeagueMember.objects.bulk_update(members, ["total_points"])

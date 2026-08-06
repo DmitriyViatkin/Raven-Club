@@ -49,10 +49,11 @@ class LeagueMember (models.Model):
 
 class UserLeaguePoints(models.Model):
     league_member = models.ForeignKey(
-        LeagueMember, on_delete=models.CASCADE, related_name='points'
+        LeagueMember, on_delete=models.CASCADE, related_name='point_entries'
     )
-    match = models.ForeignKey(
-        "tournaments.Match", on_delete=models.CASCADE, related_name='league_points'
+    prediction = models.ForeignKey(
+        "results.Prediction", on_delete=models.CASCADE,
+        related_name='league_points'
     )
     point_correct_winner = models.IntegerField(default=0)
     point_correct_diff = models.IntegerField(default=0)
@@ -60,7 +61,7 @@ class UserLeaguePoints(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('league_member', 'match')
+        unique_together = ('league_member', 'prediction')
         ordering = ['-created_at']
         verbose_name = "User League Points"
         verbose_name_plural = "User League Points"
@@ -74,15 +75,13 @@ class UserLeaguePoints(models.Model):
         )
 
 class ScoringRules(models.Model):
-
-    league= models.ForeignKey(League, on_delete= models.CASCADE)
+    league = models.OneToOneField(
+        League, on_delete=models.CASCADE, related_name="scoring_rules"
+    )
     point_exact_score = models.IntegerField()
     point_correct_winner= models.IntegerField()
     point_correct_diff= models.IntegerField()
-    points_home_scored = models.IntegerField()
-    points_away_scored = models.IntegerField()
-    points_home_clean_sheet = models.IntegerField()
-    points_away_clean_sheet = models.IntegerField()
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

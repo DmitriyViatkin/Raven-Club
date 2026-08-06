@@ -68,27 +68,16 @@ class MatchResult(models.Model):
 
 class Prediction(models.Model):
     """Прогнози користувачів на конкретні матчі."""
-
     user = models.ForeignKey(Player, on_delete=models.CASCADE,
                              related_name="predictions")
     match = models.ForeignKey(Match, on_delete=models.CASCADE,
                               related_name="predictions")
-
     # Денормалізоване поле за ТЗ для швидкої фільтрації прогнозів по всьому турніру
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE,
                                    related_name="predictions")
-
     home_ft = models.IntegerField()
     away_ft = models.IntegerField()
-
-    home_scored = models.BooleanField(default=False)
-    away_scored = models.BooleanField(default=False)
-    home_clean_sheet = models.BooleanField(default=False)
-    away_clean_sheet = models.BooleanField(default=False)
-
-    # Виправлено: додано default=0, оскільки на старті балів ще немає
     points_earned = models.IntegerField(default=0)
-
     is_calculated = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -100,5 +89,4 @@ class Prediction(models.Model):
         verbose_name_plural = "Predictions"
 
     def __str__(self):
-        # Виправлено синтаксичну помилку розриву рядка
         return f"Prediction by {self.user.username} for match {self.match_id} ({self.home_ft}:{self.away_ft})"
