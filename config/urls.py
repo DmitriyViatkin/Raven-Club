@@ -25,7 +25,7 @@ import leaderboard
 urlpatterns = [
 
     path ('', include('authentication.urls')),
-    path('', include('django.contrib.auth.urls')),
+   # path('', include('django.contrib.auth.urls')),
     path ('', include('core.urls')),
     path ('predictions/', include('src.leagues.urls')),
     path ('users/', include('src.users.urls')),
