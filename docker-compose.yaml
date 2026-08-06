@@ -40,7 +40,13 @@ services:
       DB_PORT: 5432
       CELERY_BROKER_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD}@redis:6379/0
-      SERVICE_ROLE: web
+    command: >
+      gunicorn config.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 3
+      --timeout 60
+      --access-logfile -
+      --error-logfile -
     depends_on:
       db:
         condition: service_healthy
@@ -64,7 +70,7 @@ services:
       DB_PORT: 5432
       CELERY_BROKER_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       CELERY_RESULT_BACKEND: redis://:${REDIS_PASSWORD}@redis:6379/0
-      SERVICE_ROLE: celery
+
     entrypoint: []
     command: celery -A config worker -l info
     depends_on:
