@@ -2,6 +2,9 @@
 
 Онлайн-платформа для футбольного менеджменту та спортивних прогнозів. Користувачі створюють ліги, запрошують учасників, роблять прогнози на матчі та змагаються за місце в таблиці лідерів.
 
+🔗 **Демо:** [crow-club-nginx.rtot74.easypanel.host/leaderboard](https://crow-club-nginx.rtot74.easypanel.host/leaderboard/)
+Проєкт розгорнутий на сервері з використанням Easypanel.
+
 ## 🧩 Функціонал
 
 - **Ліги** — створення приватних і публічних ліг, запрошення учасників, налаштування власних правил нарахування балів для кожної ліги
@@ -30,7 +33,9 @@
 
 **DevOps**
 - Docker + docker-compose (postgres, redis, celery worker, celery beat, web)
+- Nginx
 - django-environ, Whitenoise
+- Деплой на сервер через Easypanel
 
 ## 🗂 Структура проєкту
 
@@ -61,9 +66,7 @@ docker-compose up --build
 
 Піднімаються сервіси: `web` (Django), `db` (PostgreSQL 16), `redis`, `celery_worker`, `celery_beat`.
 
-## 📸 Скріншоти
-
-*(додати скріншоти особистого кабінету ліги, таблиці лідерів та адмін-панелі)*
+ 
 
 ## 📌 Статус
 
